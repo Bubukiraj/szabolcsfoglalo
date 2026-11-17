@@ -554,6 +554,7 @@ class SzabolcsGame {
   }
 
   openStartModal() {
+    this.dom.modalOverlay.style.display = 'flex';
     this.dom.modalOverlay.classList.add('active');
     this.dom.startModal.style.display = 'block';
     this.dom.briefingModal.style.display = 'none';
@@ -563,6 +564,7 @@ class SzabolcsGame {
 
   closeModal() {
     this.dom.modalOverlay.classList.remove('active');
+    this.dom.modalOverlay.style.display = 'none';
     this.dom.startModal.style.display = 'none';
     this.dom.briefingModal.style.display = 'none';
     this.dom.quizModal.style.display = 'none';
@@ -1000,6 +1002,7 @@ class SzabolcsGame {
     clearInterval(this.briefingTimer);
     this.briefingTimeLeft = 5;
 
+    this.dom.modalOverlay.style.display = 'flex';
     this.dom.modalOverlay.classList.add('active');
     this.dom.briefingModal.style.display = 'block';
     this.dom.quizModal.style.display = 'none';
@@ -1050,6 +1053,12 @@ class SzabolcsGame {
 
   launchQuestionModal() {
     clearInterval(this.briefingTimer);
+    if (this.isOnlineGame && !this.isHost) {
+      if (this.dom.briefingCountdown) {
+        this.dom.briefingCountdown.innerText = 'Várakozás a kérdésre a szobagazdától...';
+      }
+      return;
+    }
     this.dom.briefingModal.style.display = 'none';
     this.presentTriviaQuestion(this.phase === 'BATTLE' ? 'BATTLE' : 'EXPANSION');
   }
@@ -1126,7 +1135,9 @@ class SzabolcsGame {
 
     this.updateLifelineButtons();
 
+    this.dom.modalOverlay.style.display = 'flex';
     this.dom.modalOverlay.classList.add('active');
+    this.dom.briefingModal.style.display = 'none';
     this.dom.quizModal.style.display = 'block';
 
     if (this.isOnlineGame && this.isHost && this.multiplayer) {
@@ -1873,6 +1884,7 @@ class SzabolcsGame {
       `;
     });
 
+    this.dom.modalOverlay.style.display = 'flex';
     this.dom.modalOverlay.classList.add('active');
     this.dom.victoryModal.style.display = 'block';
     this.dom.briefingModal.style.display = 'none';
@@ -1954,6 +1966,9 @@ class SzabolcsGame {
   }
 
   applyRemoteQuestion(question) {
+    clearInterval(this.briefingTimer);
+    if (this.dom.briefingModal) this.dom.briefingModal.style.display = 'none';
+
     this.currentQuestion = question;
     this.playerAnswers = {};
     this.dom.revealBox.style.display = 'none';
@@ -1981,6 +1996,7 @@ class SzabolcsGame {
     }
 
     this.updateLifelineButtons();
+    this.dom.modalOverlay.style.display = 'flex';
     this.dom.modalOverlay.classList.add('active');
     this.dom.quizModal.style.display = 'block';
 

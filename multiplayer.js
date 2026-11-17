@@ -361,12 +361,18 @@ class SzabolcsMultiplayer {
   openLobbyModal() {
     if (this.dom.startModal) this.dom.startModal.style.display = 'none';
     if (this.dom.lobbyModal) this.dom.lobbyModal.style.display = 'block';
-    if (this.dom.modalOverlay) this.dom.modalOverlay.style.display = 'flex';
+    if (this.dom.modalOverlay) {
+      this.dom.modalOverlay.style.display = 'flex';
+      this.dom.modalOverlay.classList.add('active');
+    }
   }
 
   closeLobbyModal() {
     if (this.dom.lobbyModal) this.dom.lobbyModal.style.display = 'none';
-    if (this.dom.modalOverlay) this.dom.modalOverlay.style.display = 'none';
+    if (this.dom.modalOverlay) {
+      this.dom.modalOverlay.classList.remove('active');
+      this.dom.modalOverlay.style.display = 'none';
+    }
   }
 
   updateLobbyUI() {
