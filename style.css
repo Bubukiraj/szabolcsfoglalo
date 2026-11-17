@@ -1367,36 +1367,44 @@ svg#szabolcs-map {
 .mode-radio-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 12px;
+  margin-top: 4px;
 }
 
 .mode-card {
   border: 1.5px solid var(--gold-dark);
   background: rgba(44,24,16,0.04);
-  padding: 10px;
-  border-radius: 4px;
+  padding: 12px 10px;
+  border-radius: 6px;
   cursor: pointer;
   text-align: center;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  user-select: none;
 }
 
-.mode-card input { display: none; }
+.mode-card:hover {
+  background: rgba(200,168,78,0.18);
+  border-color: var(--gold-light);
+  transform: translateY(-1px);
+}
 
 .mode-card.selected {
-  border-color: var(--gold);
-  background: rgba(200,168,78,0.12);
+  border: 2px solid var(--gold);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(138, 90, 43, 0.15) 100%);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.35);
 }
 
 .mode-card h4 {
   font-family: 'Cinzel', serif;
-  font-size: 12px;
-  color: var(--text-dark);
-  margin-bottom: 3px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--leather-dark);
+  margin-bottom: 4px;
 }
 
 .mode-card span {
-  font-size: 10px;
-  color: var(--text-light);
+  font-size: 11px;
+  color: #6a5749;
 }
 
 /* ============ GYŐZELMI KÉPERNYŐ ============ */

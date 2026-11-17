@@ -142,23 +142,16 @@
         </div>
 
         <div class="form-group">
-          <label>Játékmód:</label>
+          <label>Válassz Játékmódot:</label>
           <div class="mode-radio-group">
-            <label class="mode-card selected">
-              <input type="radio" name="gamemode" value="bot" checked>
-              <h4>Egyjátékos</h4>
-              <span>2 gépi ellenfél ellen</span>
-            </label>
-            <label class="mode-card">
-              <input type="radio" name="gamemode" value="online">
-              <h4>Online 3 Fő</h4>
-              <span>Szobakód / Render.com</span>
-            </label>
-            <label class="mode-card">
-              <input type="radio" name="gamemode" value="pass">
-              <h4>Egy gépen</h4>
-              <span>3 játékos felváltva</span>
-            </label>
+            <div class="mode-card selected" id="mode-btn-single">
+              <h4>🗡️ Egyjátékos</h4>
+              <span>2 gépi vezér ellen</span>
+            </div>
+            <div class="mode-card" id="mode-btn-online">
+              <h4>🌐 Online 3 Fő</h4>
+              <span>Szobakód / Barátokkal</span>
+            </div>
           </div>
         </div>
       </div>
@@ -366,15 +359,8 @@
 
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    // Fallback ha a szerver nélküli megnyitáskor nem érhető el a lokális socket.io
-    if (typeof io === 'undefined') {
-      const cdnScript = document.createElement('script');
-      cdnScript.src = 'https://cdn.socket.io/4.7.5/socket.io.min.js';
-      document.head.appendChild(cdnScript);
-    }
-  </script>
+  <!-- Socket.IO valós idejű hálózati könyvtár (Render és lokális szerverhez) -->
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="audio.js"></script>
   <script src="map-data.js"></script>
   <script src="questions.js"></script>

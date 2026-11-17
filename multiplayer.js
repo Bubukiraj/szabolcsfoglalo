@@ -2,8 +2,8 @@
  * =========================================================================
  * 🏰 SZABOLCSFOGLALÓ — MULTIPLAYER HÁLÓZATI MENEDZSER (Socket.IO)
  * =========================================================================
- * Kezeli a szobák létrehozását, csatlakozást, valós idejű játékos-szinkronizációt
- * Render.com és lokális szerver környezetben egyaránt.
+ * Kezeli az Egyjátékos / Online 3 fős módváltást, szobák létrehozását,
+ * csatlakozást és valós idejű játékos-szinkronizációt.
  */
 
 class SzabolcsMultiplayer {
@@ -31,12 +31,13 @@ class SzabolcsMultiplayer {
     this.dom.startModal = document.getElementById('start-modal');
     this.dom.lobbyModal = document.getElementById('multiplayer-lobby-modal');
     
-    // Kezdőképernyő módválasztók
-    this.dom.modeCards = document.querySelectorAll('.mode-card input[name="gamemode"]');
+    // Módválasztó kártyák
+    this.dom.modeBtnSingle = document.getElementById('mode-btn-single');
+    this.dom.modeBtnOnline = document.getElementById('mode-btn-online');
     this.dom.singlePlayerSection = document.getElementById('singleplayer-start-section');
     this.dom.multiplayerSection = document.getElementById('multiplayer-options-section');
     
-    // Szoba kezelő gombok
+    // Szobakezelő gombok és input
     this.dom.btnCreateRoom = document.getElementById('btn-create-room');
     this.dom.btnJoinRoom = document.getElementById('btn-join-room');
     this.dom.inputRoomCode = document.getElementById('input-room-code');
@@ -57,37 +58,60 @@ class SzabolcsMultiplayer {
     this.dom.btnLeaveLobby = document.getElementById('btn-leave-lobby');
   }
 
+  // ==========================================
+  // JÁTÉKMÓD VÁLTÁS (EGYJÁTÉKOS <-> ONLINE 3 FŐ)
+  // ==========================================
+  setMode(mode) {
+    if (window.szabolcsAudio) window.szabolcsAudio.playClick();
+
+    if (mode === 'online') {
+      if (this.dom.modeBtnSingle) this.dom.modeBtnSingle.classList.remove('selected');
+      if (this.dom.modeBtnOnline) this.dom.modeBtnOnline.classList.add('selected');
+      if (this.dom.singlePlayerSection) this.dom.singlePlayerSection.style.display = 'none';
+      if (this.dom.multiplayerSection) this.dom.multiplayerSection.style.display = 'block';
+
+      // Előre csatlakoztatjuk a socketet a háttérben
+      this.ensureSocketConnected();
+    } else {
+      if (this.dom.modeBtnOnline) this.dom.modeBtnOnline.classList.remove('selected');
+      if (this.dom.modeBtnSingle) this.dom.modeBtnSingle.classList.add('selected');
+      if (this.dom.singlePlayerSection) this.dom.singlePlayerSection.style.display = 'block';
+      if (this.dom.multiplayerSection) this.dom.multiplayerSection.style.display = 'none';
+    }
+  }
+
   bindEvents() {
-    // Játékmód rádiógomb váltás (Egyjátékos vs Online többjátékos)
-    this.dom.modeCards.forEach(radio => {
-      radio.addEventListener('change', (e) => {
-        document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
-        const parentCard = e.target.closest('.mode-card');
-        if (parentCard) parentCard.classList.add('selected');
+    // 1. Módválasztó gombok eseményei
+    if (this.dom.modeBtnSingle) {
+      this.dom.modeBtnSingle.addEventListener('click', () => this.setMode('single'));
+    }
+    if (this.dom.modeBtnOnline) {
+      this.dom.modeBtnOnline.addEventListener('click', () => this.setMode('online'));
+    }
 
-        const val = e.target.value;
-        if (val === 'online') {
-          if (this.dom.singlePlayerSection) this.dom.singlePlayerSection.style.display = 'none';
-          if (this.dom.multiplayerSection) this.dom.multiplayerSection.style.display = 'block';
-        } else {
-          if (this.dom.singlePlayerSection) this.dom.singlePlayerSection.style.display = 'block';
-          if (this.dom.multiplayerSection) this.dom.multiplayerSection.style.display = 'none';
-        }
-      });
-    });
-
-    // Szoba Létrehozása
+    // 2. Szoba Létrehozása gomb
     if (this.dom.btnCreateRoom) {
       this.dom.btnCreateRoom.addEventListener('click', () => {
-        this.ensureSocketConnected(() => {
-          const pName = this.getPlayerName();
-          console.log('[Multiplayer] Szoba létrehozás kérése:', pName);
-          this.socket.emit('create_room', { playerName: pName });
-        });
+        const originalText = this.dom.btnCreateRoom.innerText;
+        this.dom.btnCreateRoom.innerText = '⌛ Szoba létrehozása...';
+        this.dom.btnCreateRoom.disabled = true;
+
+        this.ensureSocketConnected(
+          () => {
+            const pName = this.getPlayerName();
+            console.log('[Multiplayer] Szoba létrehozás kérése:', pName);
+            this.socket.emit('create_room', { playerName: pName });
+          },
+          (err) => {
+            this.dom.btnCreateRoom.innerText = originalText;
+            this.dom.btnCreateRoom.disabled = false;
+            alert('⚠️ Nem sikerült kapcsolódni a szerverhez!\nHa a Render.com-ot használod, ellenőrizd, hogy a Start Command "node server.js"-re van-e állítva, és a szerver zöld "Live" állapotban van-e.');
+          }
+        );
       });
     }
 
-    // Csatlakozás Szobához
+    // 3. Csatlakozás Szobához gomb
     if (this.dom.btnJoinRoom) {
       this.dom.btnJoinRoom.addEventListener('click', () => {
         const code = this.dom.inputRoomCode.value.trim().toUpperCase();
@@ -95,20 +119,42 @@ class SzabolcsMultiplayer {
           alert('Kérlek írd be a szobakódot a csatlakozáshoz!');
           return;
         }
-        this.ensureSocketConnected(() => {
-          const pName = this.getPlayerName();
-          console.log('[Multiplayer] Csatlakozás kérése:', code, pName);
-          this.socket.emit('join_room', { roomCode: code, playerName: pName });
-        });
+
+        const originalText = this.dom.btnJoinRoom.innerText;
+        this.dom.btnJoinRoom.innerText = '⌛ Csatlakozás...';
+        this.dom.btnJoinRoom.disabled = true;
+
+        this.ensureSocketConnected(
+          () => {
+            const pName = this.getPlayerName();
+            console.log('[Multiplayer] Csatlakozás kérése:', code, pName);
+            this.socket.emit('join_room', { roomCode: code, playerName: pName });
+          },
+          (err) => {
+            this.dom.btnJoinRoom.innerText = originalText;
+            this.dom.btnJoinRoom.disabled = false;
+            alert('⚠️ Nem sikerült kapcsolódni a szerverhez!\nEllenőrizd a szervert és próbáld újra.');
+          }
+        );
       });
     }
 
-    // Kód és link másolása a vágólapra
+    // Enter lenyomás a szobakód mezőben
+    if (this.dom.inputRoomCode) {
+      this.dom.inputRoomCode.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (this.dom.btnJoinRoom) this.dom.btnJoinRoom.click();
+        }
+      });
+    }
+
+    // 4. Kód és link másolása a vágólapra
     if (this.dom.btnCopyCode) {
       this.dom.btnCopyCode.addEventListener('click', () => {
         if (!this.roomCode) return;
         navigator.clipboard.writeText(this.roomCode).then(() => {
-          this.showNotification('Szobakód másolva a vágólapra!');
+          this.showNotification('📋 Szobakód másolva a vágólapra!');
         });
       });
     }
@@ -118,12 +164,12 @@ class SzabolcsMultiplayer {
         if (!this.roomCode) return;
         const url = `${window.location.origin}${window.location.pathname}?szoba=${this.roomCode}`;
         navigator.clipboard.writeText(url).then(() => {
-          this.showNotification('Meghívó link kimásolva!');
+          this.showNotification('🔗 Meghívó link kimásolva!');
         });
       });
     }
 
-    // Üres hely feltöltése bottal (csak a gazdának)
+    // 5. Üres hely feltöltése bottal
     if (this.dom.btnAddBot) {
       this.dom.btnAddBot.addEventListener('click', () => {
         if (!this.isHost || !this.socket) return;
@@ -131,7 +177,7 @@ class SzabolcsMultiplayer {
       });
     }
 
-    // Többjátékos meccs indítása (csak a gazdának)
+    // 6. Többjátékos meccs indítása (csak a gazdának)
     if (this.dom.btnStartMultiplayer) {
       this.dom.btnStartMultiplayer.addEventListener('click', () => {
         if (!this.isHost || !this.socket) return;
@@ -139,17 +185,19 @@ class SzabolcsMultiplayer {
       });
     }
 
-    // Kilépés a szobából a főmenübe
+    // 7. Kilépés a szobából a főmenübe
     if (this.dom.btnLeaveLobby) {
       this.dom.btnLeaveLobby.addEventListener('click', () => {
         if (this.socket) {
           this.socket.disconnect();
           this.socket = null;
+          this.connected = false;
         }
         this.isMultiplayer = false;
         this.roomCode = null;
         if (this.dom.lobbyModal) this.dom.lobbyModal.style.display = 'none';
         if (this.dom.startModal) this.dom.startModal.style.display = 'block';
+        if (this.dom.modalOverlay) this.dom.modalOverlay.style.display = 'flex';
       });
     }
   }
@@ -159,11 +207,7 @@ class SzabolcsMultiplayer {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('szoba') || params.get('room');
     if (code) {
-      const onlineRadio = document.querySelector('input[name="gamemode"][value="online"]');
-      if (onlineRadio) {
-        onlineRadio.checked = true;
-        onlineRadio.dispatchEvent(new Event('change'));
-      }
+      this.setMode('online');
       if (this.dom.inputRoomCode) {
         this.dom.inputRoomCode.value = code.toUpperCase();
       }
@@ -178,32 +222,76 @@ class SzabolcsMultiplayer {
   }
 
   // Socket.IO kapcsolat felépítése
-  ensureSocketConnected(callback) {
+  ensureSocketConnected(callback, errorCallback) {
     if (this.socket && this.socket.connected) {
       if (callback) callback();
       return;
     }
 
     if (typeof io === 'undefined') {
-      alert('A Socket.IO könyvtár még nem töltődött be! Kérlek indítsd el a szervert ("node server.js").');
+      console.error('[Multiplayer] A Socket.IO könyvtár még nem töltődött be!');
+      if (errorCallback) errorCallback('Socket.IO not loaded');
       return;
     }
 
-    this.socket = io();
+    if (!this.socket) {
+      this.socket = io({
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        timeout: 10000
+      });
 
-    this.socket.on('connect', () => {
-      console.log('[Multiplayer] Socket csatlakozva a szerverhez:', this.socket.id);
-      this.connected = true;
+      this.setupSocketListeners();
+    }
+
+    if (this.socket.connected) {
       if (callback) callback();
+    } else {
+      let isHandled = false;
+
+      const onConnect = () => {
+        if (isHandled) return;
+        isHandled = true;
+        this.connected = true;
+        this.socket.off('connect_error', onError);
+        if (callback) callback();
+      };
+
+      const onError = (err) => {
+        if (isHandled) return;
+        isHandled = true;
+        this.socket.off('connect', onConnect);
+        console.error('[Multiplayer] Socket kapcsolódási hiba:', err);
+        if (errorCallback) errorCallback(err);
+      };
+
+      this.socket.once('connect', onConnect);
+      this.socket.once('connect_error', onError);
+
+      setTimeout(() => {
+        if (!isHandled && !this.socket.connected) {
+          isHandled = true;
+          this.socket.off('connect', onConnect);
+          this.socket.off('connect_error', onError);
+          if (errorCallback) errorCallback('Connection timed out');
+        }
+      }, 9000);
+    }
+  }
+
+  setupSocketListeners() {
+    this.socket.on('connect', () => {
+      console.log('[Multiplayer] Socket csatlakozva:', this.socket.id);
+      this.connected = true;
     });
 
-    this.socket.on('connect_error', (err) => {
-      console.error('[Multiplayer] Kapcsolódási hiba:', err);
-      alert('Nem sikerült csatlakozni a szerverhez! Ellenőrizd, hogy fut-e a Node.js szerver.');
-    });
-
-    // 1. Szoba létrehozva válasz
+    // 1. Szoba létrehozva
     this.socket.on('room_created', (data) => {
+      if (this.dom.btnCreateRoom) {
+        this.dom.btnCreateRoom.innerText = '🏰 Új Szoba Létrehozása (Gazda)';
+        this.dom.btnCreateRoom.disabled = false;
+      }
       this.roomCode = data.roomCode;
       this.myPlayerId = data.myPlayerId;
       this.isHost = true;
@@ -214,8 +302,12 @@ class SzabolcsMultiplayer {
       if (window.szabolcsAudio) window.szabolcsAudio.playClick();
     });
 
-    // 2. Sikeres csatlakozás meglévő szobához
+    // 2. Sikeres csatlakozás
     this.socket.on('room_joined', (data) => {
+      if (this.dom.btnJoinRoom) {
+        this.dom.btnJoinRoom.innerText = 'Csatlakozás';
+        this.dom.btnJoinRoom.disabled = false;
+      }
       this.roomCode = data.roomCode;
       this.myPlayerId = data.myPlayerId;
       this.isHost = false;
@@ -233,27 +325,33 @@ class SzabolcsMultiplayer {
       this.updateLobbyUI();
     });
 
-    // 4. Szobahiba (nem létezik, tele van, stb.)
+    // 4. Szobahiba
     this.socket.on('room_error', (data) => {
+      if (this.dom.btnCreateRoom) {
+        this.dom.btnCreateRoom.innerText = '🏰 Új Szoba Létrehozása (Gazda)';
+        this.dom.btnCreateRoom.disabled = false;
+      }
+      if (this.dom.btnJoinRoom) {
+        this.dom.btnJoinRoom.innerText = 'Csatlakozás';
+        this.dom.btnJoinRoom.disabled = false;
+      }
       alert(`⚠️ Hiba: ${data.message}`);
     });
 
     // 5. Játék elindult a szobában
     this.socket.on('game_started', (data) => {
-      console.log('[Multiplayer] A játék elkezdődött!', data);
+      console.log('[Multiplayer] A játék elindult!', data);
       this.roomPlayers = data.players;
       this.closeLobbyModal();
-      
-      // Átadjuk a vezérlést a játékmotornak a szinkronizált játékosokkal
       this.game.startOnlineMultiplayerGame(data.players, this.myPlayerId, this.isHost);
     });
 
-    // 6. Távoli játékos akció érkezett
+    // 6. Távoli játékos akció
     this.socket.on('remote_game_action', (actionData) => {
       this.handleRemoteAction(actionData);
     });
 
-    // 7. Játékos kapcsolat megszakadt
+    // 7. Játékos megszakadt
     this.socket.on('player_disconnected', (data) => {
       console.warn('[Multiplayer] Játékos megszakadt:', data);
       this.game.handlePlayerDisconnect(data.playerId, data.playerName);
@@ -276,7 +374,6 @@ class SzabolcsMultiplayer {
       this.dom.lobbyRoomCode.innerText = this.roomCode || '---';
     }
 
-    // 3 játékos kártya frissítése
     const slots = ['p1', 'p2', 'p3'];
     slots.forEach((slotId, idx) => {
       const card = this.dom.lobbyPlayerCards[idx];
@@ -316,8 +413,6 @@ class SzabolcsMultiplayer {
       }
     });
 
-    // Indító gomb és állapotfrissítés
-    const humanCount = this.roomPlayers.filter(p => !p.isBot).length;
     const totalCount = this.roomPlayers.length;
 
     if (this.isHost) {
@@ -347,7 +442,6 @@ class SzabolcsMultiplayer {
     }
   }
 
-  // Akció küldése a szoba összes többi tagjának
   sendAction(type, payload = {}) {
     if (!this.isMultiplayer || !this.socket) return;
     this.socket.emit('game_action', {
@@ -358,10 +452,9 @@ class SzabolcsMultiplayer {
     });
   }
 
-  // Távoli játékos akció feldolgozása a játékmotorban
   handleRemoteAction(data) {
     if (!data || !data.type) return;
-    const { type, senderPlayerId, payload } = data;
+    const { type, payload } = data;
 
     switch (type) {
       case 'PICK_BASE':
@@ -393,7 +486,7 @@ class SzabolcsMultiplayer {
         break;
 
       default:
-        console.log('[Multiplayer] Ismeretlen távoli akció:', type, payload);
+        console.log('[Multiplayer] Ismeretlen akció:', type);
     }
   }
 
@@ -412,5 +505,4 @@ class SzabolcsMultiplayer {
   }
 }
 
-// Globális példány
 window.SzabolcsMultiplayer = SzabolcsMultiplayer;

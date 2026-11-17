@@ -186,15 +186,6 @@ class SzabolcsGame {
     this.dom.btnLifelineChoice.addEventListener('click', () => this.useLifelineChoice());
     this.dom.btnLifelineGuess.addEventListener('click', () => this.useLifelineGuess());
 
-    // Játékmód választó kártyák
-    document.querySelectorAll('.mode-card').forEach(card => {
-      card.addEventListener('click', () => {
-        document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-        card.querySelector('input').checked = true;
-      });
-    });
-
     // Győzelmi ablak "Új játék" gombja
     document.getElementById('btn-play-again').addEventListener('click', () => {
       this.closeModal();
@@ -583,9 +574,11 @@ class SzabolcsGame {
   // ==========================================
   startNewGame() {
     this.resetAllTimers();
+    this.isOnlineGame = false;
+    this.myPlayerId = 'p1';
+    this.isHost = true;
 
     const p1Name = document.getElementById('player-name-input').value.trim() || 'Játékos 1';
-    const isPassPlay = document.querySelector('input[name="gamemode"]:checked').value === 'pass';
 
     this.players[0].name = p1Name;
     this.players[0].isBot = false;
@@ -595,16 +588,16 @@ class SzabolcsGame {
     this.players[0].alive = true;
     this.players[0].lifelines = { choice: 1, guess: 1 };
 
-    this.players[1].name = isPassPlay ? 'Játékos 2' : 'Báthori Erzsébet';
-    this.players[1].isBot = !isPassPlay;
+    this.players[1].name = 'Báthori Erzsébet';
+    this.players[1].isBot = true;
     this.players[1].score = 0;
     this.players[1].towers = 3;
     this.players[1].castleCity = null;
     this.players[1].alive = true;
     this.players[1].lifelines = { choice: 1, guess: 1 };
 
-    this.players[2].name = isPassPlay ? 'Játékos 3' : 'Kállai Botond';
-    this.players[2].isBot = !isPassPlay;
+    this.players[2].name = 'Kállai Botond';
+    this.players[2].isBot = true;
     this.players[2].score = 0;
     this.players[2].towers = 3;
     this.players[2].castleCity = null;
