@@ -11,8 +11,8 @@ class SzabolcsGame {
     // Játékosok inicializálása
     this.players = [
       { id: 'p1', name: 'Játékos 1', color: 'p1', colorHex: '#e74c3c', score: 0, isBot: false, castleCity: null, towers: 3, alive: true, lifelines: { choice: 1, guess: 1 } },
-      { id: 'p2', name: 'Báthori Erzsébet', color: 'p2', colorHex: '#2ecc71', score: 0, isBot: true, castleCity: null, towers: 3, alive: true, lifelines: { choice: 1, guess: 1 } },
-      { id: 'p3', name: 'Kállai Botond', color: 'p3', colorHex: '#3498db', score: 0, isBot: true, castleCity: null, towers: 3, alive: true, lifelines: { choice: 1, guess: 1 } }
+      { id: 'p2', name: 'Mc isti', color: 'p2', colorHex: '#2ecc71', score: 0, isBot: true, castleCity: null, towers: 3, alive: true, lifelines: { choice: 1, guess: 1 } },
+      { id: 'p3', name: 'Subi Roli', color: 'p3', colorHex: '#3498db', score: 0, isBot: true, castleCity: null, towers: 3, alive: true, lifelines: { choice: 1, guess: 1 } }
     ];
 
     // Játék állapotok
@@ -142,12 +142,15 @@ class SzabolcsGame {
       this.startNewGame();
     });
 
-    // Briefing "Készen állok" gomb
-    this.dom.btnReadyQuestion.addEventListener('click', () => {
-      sounds.playClick();
-      clearInterval(this.briefingTimer);
-      this.launchQuestionModal();
-    });
+    // Briefing gomb (kérésre elrejtve, automatikus 2mp időzítő váltja fel)
+    if (this.dom.btnReadyQuestion) {
+      this.dom.btnReadyQuestion.style.display = 'none';
+      this.dom.btnReadyQuestion.addEventListener('click', () => {
+        sounds.playClick();
+        clearInterval(this.briefingTimer);
+        this.launchQuestionModal();
+      });
+    }
 
     // Tippelős gyors gombok (-1000, -100, -10, -1, +1, +10, +100, +1000)
     document.querySelectorAll('.btn-adjust').forEach(btn => {
@@ -1000,7 +1003,7 @@ class SzabolcsGame {
   showBriefingModal(context) {
     this.actionLocked = true;
     clearInterval(this.briefingTimer);
-    this.briefingTimeLeft = 5;
+    this.briefingTimeLeft = 2; // Alapértelmezett 2 másodperc automatikus várakozás
 
     this.dom.modalOverlay.style.display = 'flex';
     this.dom.modalOverlay.classList.add('active');
@@ -1008,6 +1011,10 @@ class SzabolcsGame {
     this.dom.quizModal.style.display = 'none';
     this.dom.startModal.style.display = 'none';
     this.dom.victoryModal.style.display = 'none';
+
+    if (this.dom.btnReadyQuestion) {
+      this.dom.btnReadyQuestion.style.display = 'none';
+    }
 
     if (context === 'BATTLE') {
       const isBase = (this.battleDefender.castleCity === this.battleTargetCity.id);
@@ -1039,13 +1046,15 @@ class SzabolcsGame {
       this.dom.briefingStakes.innerHTML = 'A legpontosabb és leggyorsabb válaszadók szabad várost foglalhatnak el!';
     }
 
-    this.dom.briefingCountdown.innerText = `A kérdés ${this.briefingTimeLeft} másodperc múlva automatikusan indul...`;
+    this.dom.briefingCountdown.innerText = `A kérdés ${this.briefingTimeLeft} másodperc múlva indul...`;
 
     this.briefingTimer = setInterval(() => {
       this.briefingTimeLeft--;
-      this.dom.briefingCountdown.innerText = `A kérdés ${this.briefingTimeLeft} másodperc múlva automatikusan indul...`;
-      if (this.briefingTimeLeft <= 0) {
+      if (this.briefingTimeLeft > 0) {
+        this.dom.briefingCountdown.innerText = `A kérdés ${this.briefingTimeLeft} másodperc múlva indul...`;
+      } else {
         clearInterval(this.briefingTimer);
+        this.dom.briefingCountdown.innerText = 'Kérdés betöltése...';
         this.launchQuestionModal();
       }
     }, 1000);
@@ -1055,7 +1064,7 @@ class SzabolcsGame {
     clearInterval(this.briefingTimer);
     if (this.isOnlineGame && !this.isHost) {
       if (this.dom.briefingCountdown) {
-        this.dom.briefingCountdown.innerText = 'Várakozás a kérdésre a szobagazdától...';
+        this.dom.briefingCountdown.innerText = 'Kérdés betöltése a szobagazdától...';
       }
       return;
     }
@@ -1073,7 +1082,7 @@ class SzabolcsGame {
     if (!this.currentQuestion) return false;
     if (this.currentQuestion.context === 'BATTLE') {
       return (this.battleAttacker && this.battleAttacker.id === myPlayer.id) ||
-             (this.battleDefender && this.battleDefender.id === myPlayer.id);
+        (this.battleDefender && this.battleDefender.id === myPlayer.id);
     }
     return true;
   }
@@ -2130,7 +2139,7 @@ class SzabolcsGame {
     }
   }
 
-  handlePlayerDisconnect(playerId, playerName) {
+  handlePlayerDisconnect(playerId, playerName, newHostPlayerId) {
     const p = this.players.find(x => x.id === playerId);
     if (!p) return;
     p.isBot = true;
@@ -2142,6 +2151,31 @@ class SzabolcsGame {
     this.logEvent(`[Kapcsolat] ${playerName} kilépett, a helyét egy automata vezér vette át!`, p.color);
     if (this.multiplayer) {
       this.multiplayer.showNotification(`${playerName} kilépett, átvette a gép!`);
+    }
+
+    // Gazdacsere ellenőrzése: ha a szerver kijelölt minket, vagy mi vagyunk az első megmaradt élő ember
+    let becameHostNow = false;
+    if (newHostPlayerId === this.myPlayerId) {
+      becameHostNow = true;
+    } else if (!this.isHost && this.isOnlineGame) {
+      const remainingHumans = this.players.filter(x => !x.isBot);
+      if (remainingHumans.length > 0 && remainingHumans[0].id === this.myPlayerId) {
+        becameHostNow = true;
+      }
+    }
+
+    if (becameHostNow && !this.isHost) {
+      this.isHost = true;
+      if (this.multiplayer) this.multiplayer.isHost = true;
+      this.logEvent(`👑 Te lettél a meccs új szobagazdája, a játék zavartalanul halad tovább!`, '#d4af37');
+
+      // Ha épp a briefing modálban voltunk és a kérdésre vártunk:
+      if (this.dom.briefingModal && this.dom.briefingModal.style.display !== 'none') {
+        clearInterval(this.briefingTimer);
+        this.launchQuestionModal();
+      } else if (this.dom.quizModal && this.dom.quizModal.style.display !== 'none') {
+        this.scheduleBotAnswers();
+      }
     }
 
     if (this.isHost) {

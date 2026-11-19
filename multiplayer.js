@@ -351,10 +351,15 @@ class SzabolcsMultiplayer {
       this.handleRemoteAction(actionData);
     });
 
-    // 7. Játékos megszakadt
+    // 7. Játékos megszakadt / kilépett
     this.socket.on('player_disconnected', (data) => {
-      console.warn('[Multiplayer] Játékos megszakadt:', data);
-      this.game.handlePlayerDisconnect(data.playerId, data.playerName);
+      console.warn('[Multiplayer] Játékos kilépett vagy megszakadt:', data);
+      if (data.newHostPlayerId && data.newHostPlayerId === this.myPlayerId) {
+        this.isHost = true;
+        this.game.isHost = true;
+        this.showNotification('👑 Átvetted a meccs vezetését (új szobagazda lettél)!');
+      }
+      this.game.handlePlayerDisconnect(data.playerId, data.playerName, data.newHostPlayerId);
     });
   }
 

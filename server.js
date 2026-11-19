@@ -268,13 +268,32 @@ io.on('connection', (socket) => {
         });
       }
     } else {
-      // Ha már játékban voltak: értesítjük a többieket
+      // Ha már játékban voltak: értesítjük a többieket és átadjuk a szobagazda szerepet ha a gazda lépett ki
       const leftPlayer = room.players.find(p => p.socketId === socket.id);
       if (leftPlayer) {
-        console.log(`[Játékos Kilépett] ${leftPlayer.name} megszakadt a játék közben.`);
+        leftPlayer.isBot = true;
+        leftPlayer.socketId = null;
+        console.log(`[Játékos Kilépett] ${leftPlayer.name} (${leftPlayer.id}) kilépett a játékból, helyét bot veszi át.`);
+
+        let newHostPlayerId = null;
+        if (room.hostSocketId === socket.id || leftPlayer.isHost) {
+          const nextHost = room.players.find(p => !p.isBot && p.socketId);
+          if (nextHost) {
+            nextHost.isHost = true;
+            room.hostSocketId = nextHost.socketId;
+            newHostPlayerId = nextHost.id;
+            console.log(`[Új Szobagazda Kijelölve] ${nextHost.name} (${nextHost.id}) lett az új szobagazda a(z) ${roomCode} szobában!`);
+          } else {
+            console.log(`[Szoba Lezárva] Minden élő játékos kilépett a játékból: ${roomCode}`);
+            rooms.delete(roomCode);
+            return;
+          }
+        }
+
         io.to(roomCode).emit('player_disconnected', {
           playerId: leftPlayer.id,
-          playerName: leftPlayer.name
+          playerName: leftPlayer.name,
+          newHostPlayerId: newHostPlayerId
         });
       }
     }
