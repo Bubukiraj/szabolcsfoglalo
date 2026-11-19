@@ -50,6 +50,13 @@ class SzabolcsGame {
     this.isHost = false;
     this.multiplayer = null;
 
+    // Intelligens kérdéspakli és ismétlődés-gátló rendszer (Fisher-Yates keverés és előzmény-kezelés)
+    this.choiceDeck = [];
+    this.guessDeck = [];
+    this.matchUsedQuestions = new Set();
+    this.lastQuestionType = null;
+    this.initQuestionDecks();
+
     this.dom = {};
   }
 
@@ -725,6 +732,11 @@ class SzabolcsGame {
     this.activePlayerIdx = 0;
     this.actionLocked = false;
     this.currentPicker = null;
+    this.matchUsedQuestions.clear();
+    this.lastQuestionType = null;
+    if (!this.choiceDeck || this.choiceDeck.length < 15 || !this.guessDeck || this.guessDeck.length < 10) {
+      this.initQuestionDecks();
+    }
     this.clearBattleAnimations();
     this.updateLifelineButtons();
 
@@ -1197,8 +1209,104 @@ class SzabolcsGame {
   }
 
   // ==========================================
-  // KVÍZ MOTOR: Kérdés feltevése és értékelése
+  // KVÍZ MOTOR: Intelligens paklirendszer és ismétlésgátló
   // ==========================================
+  initQuestionDecks() {
+    let recentQuestions = [];
+    try {
+      const stored = localStorage.getItem('szabolcs_recent_questions');
+      if (stored) recentQuestions = JSON.parse(stored);
+    } catch (e) {
+      recentQuestions = [];
+    }
+
+    // Keverő segédfüggvény (Fisher-Yates)
+    const shuffleArray = (arr) => {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    };
+
+    // A legutóbbi játékokban már megválaszolt kérdések a pakli legvégére kerülnek
+    const createDeck = (pool) => {
+      if (!pool || pool.length === 0) return [];
+      const shuffled = shuffleArray(pool);
+      const fresh = [];
+      const recent = [];
+      shuffled.forEach(q => {
+        if (recentQuestions.includes(q.q)) {
+          recent.push(q);
+        } else {
+          fresh.push(q);
+        }
+      });
+      return [...fresh, ...recent];
+    };
+
+    this.choiceDeck = createDeck(this.questions?.choice || []);
+    this.guessDeck = createDeck(this.questions?.guess || []);
+  }
+
+  drawNextQuestion(context) {
+    if (!this.choiceDeck || this.choiceDeck.length === 0) {
+      this.choiceDeck = [...(this.questions?.choice || [])];
+      this.initQuestionDecks();
+    }
+    if (!this.guessDeck || this.guessDeck.length === 0) {
+      this.guessDeck = [...(this.questions?.guess || [])];
+      this.initQuestionDecks();
+    }
+
+    // Kiegyensúlyozott, dinamikus típusválasztás (choice vs guess)
+    let isGuess = false;
+    if (this.lastQuestionType === 'guess') {
+      isGuess = Math.random() < 0.35;
+    } else if (this.lastQuestionType === 'choice') {
+      isGuess = Math.random() < 0.55;
+    } else {
+      isGuess = Math.random() < 0.45;
+    }
+
+    let deck = isGuess ? this.guessDeck : this.choiceDeck;
+    if (!deck || deck.length === 0) {
+      isGuess = !isGuess;
+      deck = isGuess ? this.guessDeck : this.choiceDeck;
+    }
+
+    // Megkeressük az első olyan kérdést a pakliból, ami még nem volt ebben a mérkőzésben
+    let chosenIdx = -1;
+    for (let i = 0; i < deck.length; i++) {
+      if (!this.matchUsedQuestions.has(deck[i].q)) {
+        chosenIdx = i;
+        break;
+      }
+    }
+
+    // Ha az egész paklit végigjátszották a meccsben, bármelyik lapot engedjük
+    if (chosenIdx === -1) {
+      chosenIdx = 0;
+    }
+
+    const question = deck.splice(chosenIdx, 1)[0];
+    this.matchUsedQuestions.add(question.q);
+    this.lastQuestionType = isGuess ? 'guess' : 'choice';
+
+    // Előzmény frissítése a böngészőben (max utolsó 100 kérdés)
+    try {
+      let recent = [];
+      const stored = localStorage.getItem('szabolcs_recent_questions');
+      if (stored) recent = JSON.parse(stored);
+      recent.push(question.q);
+      if (recent.length > 100) recent = recent.slice(-100);
+      localStorage.setItem('szabolcs_recent_questions', JSON.stringify(recent));
+    } catch (e) {}
+
+    return { question, isGuess };
+  }
+
   isHumanParticipatingInCurrentQuestion() {
     const myPlayer = this.players.find(p => p.id === this.myPlayerId) || this.players[0];
     if (!myPlayer || !myPlayer.alive) return false;
@@ -1212,9 +1320,9 @@ class SzabolcsGame {
   }
 
   presentTriviaQuestion(context) {
-    const isGuess = Math.random() < 0.45;
-    const pool = isGuess ? this.questions.guess : this.questions.choice;
-    const rawQ = pool[Math.floor(Math.random() * pool.length)];
+    const nextData = this.drawNextQuestion(context);
+    const isGuess = nextData.isGuess;
+    const rawQ = nextData.question;
 
     this.currentQuestion = {
       ...rawQ,
@@ -2139,6 +2247,11 @@ class SzabolcsGame {
     this.activePlayerIdx = 0;
     this.actionLocked = false;
     this.currentPicker = null;
+    this.matchUsedQuestions.clear();
+    this.lastQuestionType = null;
+    if (!this.choiceDeck || this.choiceDeck.length < 15 || !this.guessDeck || this.guessDeck.length < 10) {
+      this.initQuestionDecks();
+    }
     this.clearBattleAnimations();
     this.updateLifelineButtons();
 
