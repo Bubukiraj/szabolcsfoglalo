@@ -1046,11 +1046,24 @@ class SzabolcsGame {
   }
 
   botExecuteAttack(bot, targets) {
-    targets.sort((a, b) => {
-      const isBaseA = this.players.some(p => p.castleCity === a.id) ? 1 : 0;
-      const isBaseB = this.players.some(p => p.castleCity === b.id) ? 1 : 0;
-      return (isBaseB * 500 + b.points) - (isBaseA * 500 + a.points);
-    });
+    if (!this.isOnlineGame) {
+      // Egyjátékos módban: a botok nem kizárólag a játékos bázisát ostromolják kíméletlenül,
+      // hanem természetes terjeszkedési stratégiát követnek az értékes szomszédos városok felé
+      targets.sort((a, b) => {
+        const isBaseA = this.players.some(p => p.castleCity === a.id) ? 1 : 0;
+        const isBaseB = this.players.some(p => p.castleCity === b.id) ? 1 : 0;
+        // Csak enyhe bázisbónusz (80 pont), a város pontértéke és véletlenszerű taktikai szempont számít
+        const scoreA = isBaseA * 80 + a.points + (Math.random() * 90);
+        const scoreB = isBaseB * 80 + b.points + (Math.random() * 90);
+        return scoreB - scoreA;
+      });
+    } else {
+      targets.sort((a, b) => {
+        const isBaseA = this.players.some(p => p.castleCity === a.id) ? 1 : 0;
+        const isBaseB = this.players.some(p => p.castleCity === b.id) ? 1 : 0;
+        return (isBaseB * 500 + b.points) - (isBaseA * 500 + a.points);
+      });
+    }
 
     const targetCity = targets[0];
     const defenderId = this.territoryOwners[targetCity.id];
@@ -1357,30 +1370,69 @@ class SzabolcsGame {
     }, 1000);
   }
 
+  // ==========================================
+  // BOT VÁLASZ GENERÁTOR (EGYJÁTÉKOS MÓDBAN GYENGÉBB, EMBERIBB)
+  // ==========================================
+  generateBotAnswer(botPlayer) {
+    if (!this.currentQuestion) return 0;
+    const isSinglePlayer = !this.isOnlineGame;
+
+    if (this.currentQuestion.type === 'choice') {
+      const correctIdx = this.currentQuestion.shuffledCorrectIndex;
+      // Egyjátékos módban a bot találati aránya ~45% (fair, legyőzhető),
+      // online multiplayerben a helyettesítő botok ~65%-os aránnyal bírnak
+      const hitChance = isSinglePlayer ? 0.45 : 0.65;
+      const isCorrect = Math.random() < hitChance;
+
+      if (isCorrect) {
+        return correctIdx;
+      } else {
+        // Hibás válasz: a bot biztosan a 3 rossz válasz közül választ egyet, hogy ne találjon be véletlenül
+        const wrongChoices = [0, 1, 2, 3].filter(i => i !== correctIdx);
+        return wrongChoices[Math.floor(Math.random() * wrongChoices.length)];
+      }
+    } else {
+      // Tippelős / becslős kérdés
+      const trueVal = this.currentQuestion.answer;
+
+      if (isSinglePlayer) {
+        // Egyjátékosban emberibb, életszerűbb hibahatár, hogy a játékos reálisan nyerhessen
+        if (trueVal >= 1000 && trueVal <= 2050) {
+          // Évszám jellegű kérdéseknél: +/- 25-110 év mellélövés
+          const sign = Math.random() < 0.5 ? -1 : 1;
+          const yearDiff = sign * Math.round(25 + Math.random() * 85);
+          return Math.max(1, trueVal + yearDiff);
+        } else {
+          // Általános mennyiségi kérdéseknél (terület, lakosság, magasság): 25% - 65% szórás
+          const sign = Math.random() < 0.5 ? -1 : 1;
+          const pct = sign * (0.25 + Math.random() * 0.40);
+          const variance = pct * trueVal;
+          return Math.round(Math.max(0, trueVal + variance));
+        }
+      } else {
+        // Online módban kiegyensúlyozottabb botok
+        const variance = (Math.random() * 0.4 - 0.2) * trueVal;
+        return Math.round(Math.max(0, trueVal + variance));
+      }
+    }
+  }
+
   scheduleBotAnswers() {
     if (this.isOnlineGame && !this.isHost) return;
     const isSpectator = !this.isHumanParticipatingInCurrentQuestion();
+    const isSinglePlayer = !this.isOnlineGame;
 
     this.players.forEach(p => {
       if (p.isBot && p.alive) {
-        // Ha a játékos csak néző, a botok gyorsan csapnak össze (1.2 - 2.2 mp), hogy pörgős legyen a játék!
+        // Ha a játékos csak néző (bot vs bot), a botok gyorsan döntenek (1.2 - 2.2 mp)
+        // Egyjátékosban több gondolkodási időt hagyunk a játékosnak (4.5 - 9.5 mp), így könnyebben válaszolhat elsőként
         const delay = isSpectator
           ? (1200 + Math.random() * 1000)
-          : (3500 + Math.random() * 4500);
+          : (isSinglePlayer ? (4500 + Math.random() * 4500) : (3500 + Math.random() * 4000));
 
         const t = setTimeout(() => {
           if (!this.playerAnswers[p.id] && this.timeLeft > 0) {
-            let answerVal;
-            if (this.currentQuestion.type === 'choice') {
-              const isCorrect = Math.random() < 0.72;
-              answerVal = isCorrect
-                ? this.currentQuestion.shuffledCorrectIndex
-                : Math.floor(Math.random() * 4);
-            } else {
-              const trueVal = this.currentQuestion.answer;
-              const variance = (Math.random() * 0.3 - 0.15) * trueVal;
-              answerVal = Math.round(Math.max(0, trueVal + variance));
-            }
+            const answerVal = this.generateBotAnswer(p);
             this.handlePlayerAnswer(p.id, answerVal);
             if (this.isOnlineGame && this.isHost && this.multiplayer) {
               this.multiplayer.sendAction('SUBMIT_ANSWER', { playerId: p.id, answer: answerVal, timeSpent: (20 - this.timeLeft) });
@@ -1407,17 +1459,7 @@ class SzabolcsGame {
       const quickDelay = 220 + idx * 220; // 220ms, 440ms
       const t = setTimeout(() => {
         if (!this.playerAnswers[p.id] && this.timeLeft > 0) {
-          let answerVal;
-          if (this.currentQuestion.type === 'choice') {
-            const isCorrect = Math.random() < 0.72;
-            answerVal = isCorrect
-              ? this.currentQuestion.shuffledCorrectIndex
-              : Math.floor(Math.random() * 4);
-          } else {
-            const trueVal = this.currentQuestion.answer;
-            const variance = (Math.random() * 0.3 - 0.15) * trueVal;
-            answerVal = Math.round(Math.max(0, trueVal + variance));
-          }
+          const answerVal = this.generateBotAnswer(p);
           this.handlePlayerAnswer(p.id, answerVal);
         }
       }, quickDelay);
