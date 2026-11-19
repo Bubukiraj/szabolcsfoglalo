@@ -1015,28 +1015,9 @@ svg#szabolcs-map {
   display: none !important;
 }
 
-/* Válasz visszaigazolás */
+/* Válasz visszaigazolás és felesleges sávok kikapcsolva */
 .answer-status-pill {
-  background: rgba(26,122,58,0.12);
-  border: 1.5px solid var(--p2-color);
-  color: var(--p2-color);
-  font-family: 'Cinzel', serif;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 6px 14px;
-  border-radius: 4px;
-  text-align: center;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  display: none !important;
 }
 
 /* Kérdés szövege */

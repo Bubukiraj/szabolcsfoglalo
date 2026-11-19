@@ -1488,20 +1488,12 @@ class SzabolcsGame {
       diff: diff
     };
 
-    // Ha a humán játékos adott választ: azonnali vizuális státusz és bot-gyorsítás
+    // Ha a humán játékos adott választ: segítség-gombok frissítése és bot-gyorsítás
     if (playerId === (this.isOnlineGame ? this.myPlayerId : this.players[0].id)) {
       this.updateLifelineButtons();
       if (this.dom.answerStatusPill) {
-        this.dom.answerStatusPill.style.display = 'flex';
-        if (this.currentQuestion.type === 'choice') {
-          const letters = ['A', 'B', 'C', 'D'];
-          const chosenLetter = letters[answer] || '?';
-          const chosenText = this.currentQuestion.shuffledChoices[answer] || '';
-          this.dom.answerStatusPill.innerHTML = `✅ <strong>Válaszod rögzítve:</strong> [${chosenLetter}: ${chosenText}] &bull; <em>Ellenfeleid válaszolnak...</em>`;
-        } else {
-          const unit = this.currentQuestion.unit ? ` ${this.currentQuestion.unit}` : '';
-          this.dom.answerStatusPill.innerHTML = `✅ <strong>Tipped rögzítve:</strong> ${answer}${unit} &bull; <em>Ellenfeleid válaszolnak...</em>`;
-        }
+        this.dom.answerStatusPill.style.display = 'none';
+        this.dom.answerStatusPill.innerHTML = '';
       }
       this.accelerateRemainingBots();
     }
