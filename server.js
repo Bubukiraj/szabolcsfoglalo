@@ -1,7 +1,7 @@
-/**
- * Szabolcsfoglaló - Render.com Kompatibilis Node.js WebSocket & Web Szerver
- * Express + Socket.IO 3 fős valós idejű multiplayer szobakezelővel.
- */
+
+
+
+
 
 const express = require('express');
 const http = require('http');
@@ -19,16 +19,16 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 3000;
 
-// Statikus fájlok kiszolgálása a projekt gyökeréből
+
 app.use(express.static(path.join(__dirname)));
 
-// Egészségügyi ellenőrző végpont (Render.com health check-hez)
+
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', uptime: process.uptime(), rooms: rooms.size });
 });
 
-// Szobakezelő adatszerkezet
-// roomCode -> { code, hostSocketId, players: [...], started: false }
+
+
 const rooms = new Map();
 
 const HISTORICAL_BOTS = [
@@ -66,7 +66,7 @@ function getSlotColor(slotId) {
 io.on('connection', (socket) => {
   console.log(`[Socket] Új kapcsolat: ${socket.id}`);
 
-  // 1. Új szoba létrehozása
+  
   socket.on('create_room', (data) => {
     const playerName = (data && data.playerName && data.playerName.trim()) || 'Vezér 1';
     let roomCode = generateRoomCode();
@@ -107,7 +107,7 @@ io.on('connection', (socket) => {
     });
   });
 
-  // 2. Csatlakozás meglévő szobához
+  
   socket.on('join_room', (data) => {
     const rawCode = (data && data.roomCode) || '';
     const roomCode = rawCode.trim().toUpperCase();
@@ -157,14 +157,14 @@ io.on('connection', (socket) => {
       myPlayerId: slotId
     });
 
-    // Értesítjük a szoba összes többi tagját a megváltozott névsorról
+    
     io.to(roomCode).emit('room_update', {
       players: room.players,
       hostSocketId: room.hostSocketId
     });
   });
 
-  // 3. Üres hely kitöltése bottal (ha a gazda 2 emberrel és 1 bottal szeretne játszani)
+  
   socket.on('fill_bot_slot', (data) => {
     const room = rooms.get(socket.roomCode);
     if (!room || room.hostSocketId !== socket.id || room.started) return;
@@ -195,13 +195,13 @@ io.on('connection', (socket) => {
     });
   });
 
-  // 4. Játék elindítása a gazda által
+  
   socket.on('start_game', () => {
     const room = rooms.get(socket.roomCode);
     if (!room || room.hostSocketId !== socket.id) return;
     if (room.started) return;
 
-    // Ha kevesebb mint 3 játékos van a szobában, a hiányzó helyeket automatikusan botokkal töltjük fel
+    
     while (room.players.length < 3) {
       const slotId = getPlayerSlot(room.players);
       const colors = getSlotColor(slotId);
@@ -221,23 +221,23 @@ io.on('connection', (socket) => {
     room.started = true;
     console.log(`[Játék Indul] Szoba: ${room.code}, Játékosok:`, room.players.map(p => `${p.name} (${p.id})`));
 
-    // Mind a 3 kliens megkapja az indulási parancsot a végleges játékoslistával
+    
     io.to(room.code).emit('game_started', {
       players: room.players
     });
   });
 
-  // 5. Valós idejű játékos akciók továbbítása a szoba többi tagjának
-  // (városválasztás, kérdésmegjelenítés, válaszleadás, segítségkérés)
+  
+  
   socket.on('game_action', (actionData) => {
     const roomCode = socket.roomCode;
     if (!roomCode || !rooms.has(roomCode)) return;
 
-    // Továbbítjuk a szoba összes többi kliensének
+    
     socket.to(roomCode).emit('remote_game_action', actionData);
   });
 
-  // 6. Kapcsolat megszakadása
+  
   socket.on('disconnect', () => {
     console.log(`[Socket] Kapcsolat lezárult: ${socket.id}`);
     const roomCode = socket.roomCode;
@@ -246,14 +246,14 @@ io.on('connection', (socket) => {
     const room = rooms.get(roomCode);
 
     if (!room.started) {
-      // Ha még a lobbyban voltak, kivesszük a játékost
+      
       room.players = room.players.filter(p => p.socketId !== socket.id);
 
       if (room.players.length === 0) {
         rooms.delete(roomCode);
         console.log(`[Szoba Törölve] Üres szoba törölve: ${roomCode}`);
       } else {
-        // Ha a gazda lépett ki, a következő játékos lesz az új gazda
+        
         if (room.hostSocketId === socket.id) {
           const nextHost = room.players.find(p => !p.isBot);
           if (nextHost) {
@@ -267,7 +267,7 @@ io.on('connection', (socket) => {
         });
       }
     } else {
-      // Ha már játékban voltak: értesítjük a többieket és átadjuk a szobagazda szerepet ha a gazda lépett ki
+      
       const leftPlayer = room.players.find(p => p.socketId === socket.id);
       if (leftPlayer) {
         leftPlayer.isBot = true;

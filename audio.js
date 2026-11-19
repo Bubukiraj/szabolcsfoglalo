@@ -1,7 +1,7 @@
-/**
- * Szabolcsfoglaló Hangmotor (Web Audio API)
- * Teljesen önálló szintetizált hangok, nincs szükség külső hangfájlokra.
- */
+
+
+
+
 
 class SoundEngine {
   constructor() {
@@ -63,7 +63,7 @@ class SoundEngine {
     if (this.muted) return;
     this.init();
     if (!this.ctx) return;
-    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    const notes = [523.25, 659.25, 783.99, 1046.50]; 
     notes.forEach((freq, idx) => {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
@@ -138,7 +138,7 @@ class SoundEngine {
     if (this.muted) return;
     this.init();
     if (!this.ctx) return;
-    // Fémes pengék összecsapódása (magas frekvenciás csengés + rövid fehér zajszerű lökés)
+    
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'triangle';

@@ -1,10 +1,10 @@
-/**
- * =========================================================================
- * 🏰 SZABOLCSFOGLALÓ — NAGY MŰVELTSÉGI KÉRDÉSADATBÁZIS
- * =========================================================================
- * Általános tudományos, történelmi, földrajzi, természettudományi és klasszikus műveltségi kérdések.
- * Nincsenek helyi szűk körű kérdések, mindenkinek élvezetes és változatos kvízélmény!
- */
+
+
+
+
+
+
+
 
 const QUESTIONS_DATABASE = {
   "choice": [
@@ -3065,7 +3065,7 @@ const QUESTIONS_DATABASE = {
   ]
 };
 
-// Környezet kompatibilitás
+
 if (typeof window !== 'undefined') {
   window.QUESTIONS_DATABASE = QUESTIONS_DATABASE;
 }

@@ -1,17 +1,17 @@
-/**
- * =========================================================================
- * 🏰 SZABOLCSFOGLALÓ — MULTIPLAYER HÁLÓZATI MENEDZSER (Socket.IO)
- * =========================================================================
- * Kezeli az Egyjátékos / Online 3 fős módváltást, szobák létrehozását,
- * csatlakozást és valós idejű játékos-szinkronizációt.
- */
+
+
+
+
+
+
+
 
 class SzabolcsMultiplayer {
   constructor(game) {
     this.game = game;
     this.socket = null;
     this.roomCode = null;
-    this.myPlayerId = 'p1'; // 'p1' | 'p2' | 'p3'
+    this.myPlayerId = 'p1'; 
     this.isHost = false;
     this.isMultiplayer = false;
     this.roomPlayers = [];
@@ -31,19 +31,19 @@ class SzabolcsMultiplayer {
     this.dom.startModal = document.getElementById('start-modal');
     this.dom.lobbyModal = document.getElementById('multiplayer-lobby-modal');
     
-    // Módválasztó kártyák
+    
     this.dom.modeBtnSingle = document.getElementById('mode-btn-single');
     this.dom.modeBtnOnline = document.getElementById('mode-btn-online');
     this.dom.singlePlayerSection = document.getElementById('singleplayer-start-section');
     this.dom.multiplayerSection = document.getElementById('multiplayer-options-section');
     
-    // Szobakezelő gombok és input
+    
     this.dom.btnCreateRoom = document.getElementById('btn-create-room');
     this.dom.btnJoinRoom = document.getElementById('btn-join-room');
     this.dom.inputRoomCode = document.getElementById('input-room-code');
     this.dom.inputPlayerName = document.getElementById('player-name-input');
     
-    // Lobby elemek
+    
     this.dom.lobbyRoomCode = document.getElementById('lobby-room-code-display');
     this.dom.lobbyPlayerCards = [
       document.getElementById('lobby-card-p1'),
@@ -58,9 +58,9 @@ class SzabolcsMultiplayer {
     this.dom.btnLeaveLobby = document.getElementById('btn-leave-lobby');
   }
 
-  // ==========================================
-  // JÁTÉKMÓD VÁLTÁS (EGYJÁTÉKOS <-> ONLINE 3 FŐ)
-  // ==========================================
+  
+  
+  
   setMode(mode) {
     if (window.szabolcsAudio) window.szabolcsAudio.playClick();
 
@@ -70,7 +70,7 @@ class SzabolcsMultiplayer {
       if (this.dom.singlePlayerSection) this.dom.singlePlayerSection.style.display = 'none';
       if (this.dom.multiplayerSection) this.dom.multiplayerSection.style.display = 'block';
 
-      // Előre csatlakoztatjuk a socketet a háttérben
+      
       this.ensureSocketConnected();
     } else {
       if (this.dom.modeBtnOnline) this.dom.modeBtnOnline.classList.remove('selected');
@@ -81,7 +81,7 @@ class SzabolcsMultiplayer {
   }
 
   bindEvents() {
-    // 1. Módválasztó gombok eseményei
+    
     if (this.dom.modeBtnSingle) {
       this.dom.modeBtnSingle.addEventListener('click', () => this.setMode('single'));
     }
@@ -89,7 +89,7 @@ class SzabolcsMultiplayer {
       this.dom.modeBtnOnline.addEventListener('click', () => this.setMode('online'));
     }
 
-    // 2. Szoba Létrehozása gomb
+    
     if (this.dom.btnCreateRoom) {
       this.dom.btnCreateRoom.addEventListener('click', () => {
         const originalText = this.dom.btnCreateRoom.innerText;
@@ -111,7 +111,7 @@ class SzabolcsMultiplayer {
       });
     }
 
-    // 3. Csatlakozás Szobához gomb
+    
     if (this.dom.btnJoinRoom) {
       this.dom.btnJoinRoom.addEventListener('click', () => {
         const code = this.dom.inputRoomCode.value.trim().toUpperCase();
@@ -139,7 +139,7 @@ class SzabolcsMultiplayer {
       });
     }
 
-    // Enter lenyomás a szobakód mezőben
+    
     if (this.dom.inputRoomCode) {
       this.dom.inputRoomCode.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -149,7 +149,7 @@ class SzabolcsMultiplayer {
       });
     }
 
-    // 4. Kód és link másolása a vágólapra
+    
     if (this.dom.btnCopyCode) {
       this.dom.btnCopyCode.addEventListener('click', () => {
         if (!this.roomCode) return;
@@ -169,7 +169,7 @@ class SzabolcsMultiplayer {
       });
     }
 
-    // 5. Üres hely feltöltése bottal
+    
     if (this.dom.btnAddBot) {
       this.dom.btnAddBot.addEventListener('click', () => {
         if (!this.isHost || !this.socket) return;
@@ -177,7 +177,7 @@ class SzabolcsMultiplayer {
       });
     }
 
-    // 6. Többjátékos meccs indítása (csak a gazdának)
+    
     if (this.dom.btnStartMultiplayer) {
       this.dom.btnStartMultiplayer.addEventListener('click', () => {
         if (!this.isHost || !this.socket) return;
@@ -185,7 +185,7 @@ class SzabolcsMultiplayer {
       });
     }
 
-    // 7. Kilépés a szobából a főmenübe
+    
     if (this.dom.btnLeaveLobby) {
       this.dom.btnLeaveLobby.addEventListener('click', () => {
         if (this.socket) {
@@ -202,7 +202,7 @@ class SzabolcsMultiplayer {
     }
   }
 
-  // URL paraméter ellenőrzése (?szoba=VAR123)
+  
   checkUrlForRoomCode() {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('szoba') || params.get('room');
@@ -221,7 +221,7 @@ class SzabolcsMultiplayer {
     return 'Vezér';
   }
 
-  // Socket.IO kapcsolat felépítése
+  
   ensureSocketConnected(callback, errorCallback) {
     if (this.socket && this.socket.connected) {
       if (callback) callback();
@@ -286,7 +286,7 @@ class SzabolcsMultiplayer {
       this.connected = true;
     });
 
-    // 1. Szoba létrehozva
+    
     this.socket.on('room_created', (data) => {
       if (this.dom.btnCreateRoom) {
         this.dom.btnCreateRoom.innerText = '🏰 Új Szoba Létrehozása (Gazda)';
@@ -302,7 +302,7 @@ class SzabolcsMultiplayer {
       if (window.szabolcsAudio) window.szabolcsAudio.playClick();
     });
 
-    // 2. Sikeres csatlakozás
+    
     this.socket.on('room_joined', (data) => {
       if (this.dom.btnJoinRoom) {
         this.dom.btnJoinRoom.innerText = 'Csatlakozás';
@@ -318,14 +318,14 @@ class SzabolcsMultiplayer {
       if (window.szabolcsAudio) window.szabolcsAudio.playClick();
     });
 
-    // 3. Szoba tagjainak frissülése
+    
     this.socket.on('room_update', (data) => {
       this.roomPlayers = data.players;
       this.isHost = (data.hostSocketId === this.socket.id);
       this.updateLobbyUI();
     });
 
-    // 4. Szobahiba
+    
     this.socket.on('room_error', (data) => {
       if (this.dom.btnCreateRoom) {
         this.dom.btnCreateRoom.innerText = '🏰 Új Szoba Létrehozása (Gazda)';
@@ -338,7 +338,7 @@ class SzabolcsMultiplayer {
       alert(`⚠️ Hiba: ${data.message}`);
     });
 
-    // 5. Játék elindult a szobában
+    
     this.socket.on('game_started', (data) => {
       console.log('[Multiplayer] A játék elindult!', data);
       this.roomPlayers = data.players;
@@ -346,12 +346,12 @@ class SzabolcsMultiplayer {
       this.game.startOnlineMultiplayerGame(data.players, this.myPlayerId, this.isHost);
     });
 
-    // 6. Távoli játékos akció
+    
     this.socket.on('remote_game_action', (actionData) => {
       this.handleRemoteAction(actionData);
     });
 
-    // 7. Játékos megszakadt / kilépett
+    
     this.socket.on('player_disconnected', (data) => {
       console.warn('[Multiplayer] Játékos kilépett vagy megszakadt:', data);
       if (data.newHostPlayerId && data.newHostPlayerId === this.myPlayerId) {

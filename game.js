@@ -1,32 +1,32 @@
-/**
- * Szabolcsfoglaló - Fő Játékmotor (Robusztus, Hibamentes Vanilla JS)
- * Tiszta állapotgép mutex zárral, precíz időzítő- és eseménykezeléssel.
- */
+
+
+
+
 
 class SzabolcsGame {
   constructor() {
     this.mapData = SZABOLCS_MAP_DATA;
     this.questions = QUESTIONS_DATABASE;
 
-    // Játékosok inicializálása
+    
     this.players = [
       { id: 'p1', name: 'Játékos 1', color: 'p1', colorHex: '#e74c3c', score: 0, isBot: false, castleCity: null, towers: 3, alive: true, lifelines: { choice: 1, guess: 1 } },
       { id: 'p2', name: 'Mc Isti', color: 'p2', colorHex: '#2ecc71', score: 0, isBot: true, castleCity: null, towers: 3, alive: true, lifelines: { choice: 1, guess: 1 } },
       { id: 'p3', name: 'Subi Roli', color: 'p3', colorHex: '#3498db', score: 0, isBot: true, castleCity: null, towers: 3, alive: true, lifelines: { choice: 1, guess: 1 } }
     ];
 
-    // Játék állapotok
-    this.phase = 'SETUP'; // SETUP, BASE_SELECT, EXPANSION, BATTLE, GAMEOVER
+    
+    this.phase = 'SETUP'; 
     this.currentRound = 1;
     this.maxBattleRounds = 6;
     this.activePlayerIdx = 0;
-    this.territoryOwners = {}; // cityId -> playerId
+    this.territoryOwners = {}; 
 
-    // Mutex zárak és állapotellenőrzők a többszörös kattintási hibák megelőzésére
+    
     this.actionLocked = false;
     this.currentPicker = null;
 
-    // Időzítők és háttérfolyamatok gyűjtője a tiszta törléshez
+    
     this.questionTimer = null;
     this.briefingTimer = null;
     this.botTimeouts = [];
@@ -39,19 +39,19 @@ class SzabolcsGame {
     this.playerAnswers = {};
     this.pendingConquerors = [];
 
-    // Harc állapot
+    
     this.battleAttacker = null;
     this.battleDefender = null;
     this.battleAttackerCity = null;
     this.battleTargetCity = null;
 
-    // Online Multiplayer állapot
+    
     this.isOnlineGame = false;
     this.myPlayerId = 'p1';
     this.isHost = false;
     this.multiplayer = null;
 
-    // Intelligens kérdéspakli és ismétlődés-gátló rendszer (Fisher-Yates keverés és előzmény-kezelés)
+    
     this.choiceDeck = [];
     this.guessDeck = [];
     this.matchUsedQuestions = new Set();
@@ -96,7 +96,7 @@ class SzabolcsGame {
     this.dom.quizModal = document.getElementById('quiz-modal');
     this.dom.victoryModal = document.getElementById('victory-modal');
 
-    // Briefing elemek
+    
     this.dom.briefingBadge = document.getElementById('briefing-badge');
     this.dom.briefingTitle = document.getElementById('briefing-title');
     this.dom.briefingAttackerCard = document.getElementById('briefing-attacker-card');
@@ -109,7 +109,7 @@ class SzabolcsGame {
     this.dom.btnReadyQuestion = document.getElementById('btn-ready-question');
     this.dom.briefingCountdown = document.getElementById('briefing-countdown-text');
 
-    // Kvíz elemek
+    
     this.dom.quizTopic = document.getElementById('quiz-topic');
     this.dom.timerCircle = document.getElementById('timer-circle');
     this.dom.questionText = document.getElementById('question-text');
@@ -121,36 +121,36 @@ class SzabolcsGame {
     this.dom.btnSubmitGuess = document.getElementById('btn-submit-guess');
     this.dom.revealBox = document.getElementById('reveal-box');
 
-    // Segítségek (Lifelines)
+    
     this.dom.btnLifelineChoice = document.getElementById('btn-lifeline-choice');
     this.dom.countLifelineChoice = document.getElementById('count-lifeline-choice');
     this.dom.btnLifelineGuess = document.getElementById('btn-lifeline-guess');
     this.dom.countLifelineGuess = document.getElementById('count-lifeline-guess');
 
-    // Nézői mód és azonnali státusz visszajelzés
+    
     this.dom.spectatorBanner = document.getElementById('spectator-banner');
     this.dom.answerStatusPill = document.getElementById('answer-status-pill');
   }
 
   bindEvents() {
-    // Hang ki/be
+    
     document.getElementById('btn-mute').addEventListener('click', (e) => {
       const isMuted = sounds.toggleMute();
       e.currentTarget.innerHTML = isMuted ? '🔇 Néma' : '🔊 Hang';
     });
 
-    // Új játék gomb a fejlécben
+    
     document.getElementById('btn-restart').addEventListener('click', () => {
       this.resetAllTimers();
       this.openStartModal();
     });
 
-    // Indítás az űrlapról
+    
     document.getElementById('btn-start-game').addEventListener('click', () => {
       this.startNewGame();
     });
 
-    // Briefing gomb (kérésre elrejtve, automatikus 2mp időzítő váltja fel)
+    
     if (this.dom.btnReadyQuestion) {
       this.dom.btnReadyQuestion.style.display = 'none';
       this.dom.btnReadyQuestion.addEventListener('click', () => {
@@ -160,7 +160,7 @@ class SzabolcsGame {
       });
     }
 
-    // Tippelős gyors gombok (-1000, -100, -10, -1, +1, +10, +100, +1000)
+    
     document.querySelectorAll('.btn-adjust').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const delta = parseInt(e.target.dataset.delta);
@@ -172,7 +172,7 @@ class SzabolcsGame {
       });
     });
 
-    // Szinkronizáció a csúszka és a beviteli mező között
+    
     this.dom.guessSlider.addEventListener('input', (e) => {
       this.dom.guessInput.value = e.target.value;
     });
@@ -193,17 +193,17 @@ class SzabolcsGame {
       this.submitGuess();
     });
 
-    // Segítségek gombjai
+    
     this.dom.btnLifelineChoice.addEventListener('click', () => this.useLifelineChoice());
     this.dom.btnLifelineGuess.addEventListener('click', () => this.useLifelineGuess());
 
-    // Győzelmi ablak "Új játék" gombja
+    
     document.getElementById('btn-play-again').addEventListener('click', () => {
       this.closeModal();
       this.openStartModal();
     });
 
-    // Billentyűzet parancsok (1, 2, 3, 4 vagy A, B, C, D)
+    
     window.addEventListener('keydown', (e) => {
       if (this.dom.quizModal.style.display === 'block' && this.currentQuestion && this.currentQuestion.type === 'choice') {
         if (!this.isHumanParticipatingInCurrentQuestion()) return;
@@ -234,7 +234,7 @@ class SzabolcsGame {
     }
   }
 
-  // Időzítők teljes körű leállítása
+  
   resetAllTimers() {
     clearInterval(this.questionTimer);
     clearInterval(this.briefingTimer);
@@ -246,12 +246,12 @@ class SzabolcsGame {
     this.currentPicker = null;
   }
 
-  // ==========================================
-  // TÉRKÉP KIRAJZOLÁSA (SVG)
-  // ==========================================
-  // ==========================================
-  // TÉRKÉP KIRAJZOLÁSA (SVG)
-  // ==========================================
+  
+  
+  
+  
+  
+  
   renderMap() {
     const W = this.mapData.width;
     const H = this.mapData.height;
@@ -273,14 +273,14 @@ class SzabolcsGame {
     `;
     this.dom.svgMap.appendChild(defs);
 
-    // ==========================================
-    // 1. TÖRTÉNELMI DÍSZÍTŐ RÉTEG A TÉRKÉP HÁTTERÉBEN
-    // ==========================================
+    
+    
+    
     const decorGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     decorGroup.setAttribute('class', 'vintage-decorations');
     decorGroup.setAttribute('pointer-events', 'none');
 
-    // Navigációs loxodroma vonalak (Rhumb lines) a bal felső és jobb alsó sarokból
+    
     let rhumbLinesHtml = '';
     const angles = [0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5, 270, 292.5, 315, 337.5];
     angles.forEach(deg => {
@@ -365,9 +365,9 @@ class SzabolcsGame {
     `;
     this.dom.svgMap.appendChild(decorGroup);
 
-    // ==========================================
-    // 2. VÁRMEGYE ALAP ÉS VORONOI CELLÁK
-    // ==========================================
+    
+    
+    
     const bgGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     bgGroup.innerHTML = `
       <path class="county-shadow" d="${this.mapData.border_path}" transform="translate(4, 6)" />
@@ -375,7 +375,7 @@ class SzabolcsGame {
     `;
     this.dom.svgMap.appendChild(bgGroup);
 
-    // Kanyargós, természetes határok (maszkolva a vármegye formájára)
+    
     const cellsGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     cellsGroup.setAttribute('clip-path', 'url(#szabolcs-clip)');
 
@@ -394,7 +394,7 @@ class SzabolcsGame {
     });
     this.dom.svgMap.appendChild(cellsGroup);
 
-    // Vármegye külső díszkerete
+    
     const borderOutline = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     borderOutline.setAttribute('d', this.mapData.border_path);
     borderOutline.setAttribute('fill', 'none');
@@ -403,7 +403,7 @@ class SzabolcsGame {
     borderOutline.setAttribute('pointer-events', 'none');
     this.dom.svgMap.appendChild(borderOutline);
 
-    // Természetes szabolcsi folyók (Tisza, Szamos, Kraszna)
+    
     const riverGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     riverGroup.setAttribute('clip-path', 'url(#szabolcs-clip)');
     riverGroup.setAttribute('class', 'rivers-layer');
@@ -425,7 +425,7 @@ class SzabolcsGame {
     `;
     this.dom.svgMap.appendChild(riverGroup);
 
-    // Szélrózsa (Compass Rose) a bal felső sarokban
+    
     const compassGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     compassGroup.setAttribute('class', 'compass-rose');
     compassGroup.setAttribute('transform', 'translate(105, 115)');
@@ -460,12 +460,12 @@ class SzabolcsGame {
     `;
     this.dom.svgMap.appendChild(compassGroup);
 
-    // Harci animáció réteg
+    
     const battleLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     battleLayer.setAttribute('id', 'battle-layer');
     this.dom.svgMap.appendChild(battleLayer);
 
-    // Város jelölők és feliratok (kristálytiszta, nagy kontrasztú feliratokkal)
+    
     const nodesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     nodesGroup.setAttribute('class', 'city-nodes-group');
 
@@ -500,9 +500,9 @@ class SzabolcsGame {
     this.dom.svgMap.appendChild(nodesGroup);
   }
 
-  // ==========================================
-  // AUTENTIKUS KÖZÉPKORI BÁZISVÁR GRAFIKA (NEM TAKARJA A VÁROST!)
-  // ==========================================
+  
+  
+  
   renderCastleBadgeSvg(player, towers, city) {
     const cx = city.x;
     const cy = city.y;
@@ -526,7 +526,7 @@ class SzabolcsGame {
 
     const roman = ['💀', 'I', 'II', 'III'][towers] || 'III';
 
-    // Középső öregtorony (mindig áll)
+    
     const centerTower = `
       <rect x="${cx - 6}" y="${cy - 28}" width="12" height="18" fill="#5c4a3d" stroke="#2c1810" stroke-width="1.2" />
       <path d="M ${cx - 7},${cy - 28} h 3 v -3 h 3 v 3 h 2 v -3 h 3 v 3 h 3" stroke="#2c1810" stroke-width="1.2" fill="none" />
@@ -535,7 +535,7 @@ class SzabolcsGame {
       <polygon points="${cx},${cy - 39} ${cx + 12},${cy - 34} ${cx},${cy - 29}" fill="${pColor}" stroke="#c8a84e" stroke-width="0.8" />
     `;
 
-    // Bal oldali torony
+    
     const leftTower = (towers >= 2) ? `
       <rect x="${cx - 17}" y="${cy - 23}" width="9" height="14" fill="#4d3d32" stroke="#2c1810" stroke-width="1.2" />
       <path d="M ${cx - 18},${cy - 23} h 2.5 v -2.5 h 2.5 v 2.5 h 2 v -2.5 h 2.5 v 2.5 h 1.5" stroke="#2c1810" stroke-width="1" fill="none" />
@@ -545,7 +545,7 @@ class SzabolcsGame {
       <path d="M ${cx - 18},${cy - 9} L ${cx - 16},${cy - 15} L ${cx - 12},${cy - 11} L ${cx - 9},${cy - 9}" fill="#33241b" stroke="#1a0f0a" stroke-width="1" />
     `;
 
-    // Jobb oldali torony
+    
     const rightTower = (towers >= 3) ? `
       <rect x="${cx + 8}" y="${cy - 23}" width="9" height="14" fill="#4d3d32" stroke="#2c1810" stroke-width="1.2" />
       <path d="M ${cx + 7},${cy - 23} h 2.5 v -2.5 h 2.5 v 2.5 h 2 v -2.5 h 2.5 v 2.5 h 1.5" stroke="#2c1810" stroke-width="1" fill="none" />
@@ -660,7 +660,7 @@ class SzabolcsGame {
     `;
   }
 
-  // Térkép kattintás kezelése szigorú zárolással
+  
   onTerritoryClick(city) {
     if (this.actionLocked) return;
 
@@ -693,9 +693,9 @@ class SzabolcsGame {
     this.dom.victoryModal.style.display = 'none';
   }
 
-  // ==========================================
-  // ÚJ JÁTÉK INDÍTÁSA
-  // ==========================================
+  
+  
+  
   startNewGame() {
     this.resetAllTimers();
     this.isOnlineGame = false;
@@ -767,9 +767,9 @@ class SzabolcsGame {
     this.startBaseSelectionPhase();
   }
 
-  // ==========================================
-  // 1. FÁZIS: BÁZISVÁLASZTÁS
-  // ==========================================
+  
+  
+  
   startBaseSelectionPhase() {
     this.phase = 'BASE_SELECT';
     this.dom.phaseText.innerText = '1. Fázis: Bázisválasztás';
@@ -850,7 +850,7 @@ class SzabolcsGame {
 
     if (this.territoryOwners[city.id]) return;
 
-    // AZONNALI ZÁROLÁS: Tilos többet kattintani!
+    
     this.actionLocked = true;
     this.cleanTargetableCells();
     this.assignBaseCity(player, city);
@@ -896,9 +896,9 @@ class SzabolcsGame {
     this.logEvent(`${player.name} felépítette várát itt: ${city.name} (+${city.points} pt)!`, player.color);
   }
 
-  // ==========================================
-  // 2. FÁZIS: HONFOGLALÁS (Kérdések & Területszerzés)
-  // ==========================================
+  
+  
+  
   startExpansionPhase() {
     this.phase = 'EXPANSION';
     this.currentRound = 1;
@@ -930,9 +930,9 @@ class SzabolcsGame {
     this.animTimeouts.push(t);
   }
 
-  // ==========================================
-  // 3. FÁZIS: CSATÁK ÉS VÁRROMBOLÁS
-  // ==========================================
+  
+  
+  
   startBattlePhase() {
     this.phase = 'BATTLE';
     this.dom.phaseText.innerText = '3. Fázis: Csaták & Várrombolás';
@@ -1033,7 +1033,7 @@ class SzabolcsGame {
     const validTargets = this.getValidAttackTargets(attacker);
     if (!validTargets.some(t => t.id === city.id)) return;
 
-    // AZONNALI ZÁROLÁS: Tilos kétszer rákattintani!
+    
     this.actionLocked = true;
     this.cleanTargetableCells();
 
@@ -1060,12 +1060,12 @@ class SzabolcsGame {
 
   botExecuteAttack(bot, targets) {
     if (!this.isOnlineGame) {
-      // Egyjátékos módban: a botok nem kizárólag a játékos bázisát ostromolják kíméletlenül,
-      // hanem természetes terjeszkedési stratégiát követnek az értékes szomszédos városok felé
+      
+      
       targets.sort((a, b) => {
         const isBaseA = this.players.some(p => p.castleCity === a.id) ? 1 : 0;
         const isBaseB = this.players.some(p => p.castleCity === b.id) ? 1 : 0;
-        // Csak enyhe bázisbónusz (80 pont), a város pontértéke és véletlenszerű taktikai szempont számít
+        
         const scoreA = isBaseA * 80 + a.points + (Math.random() * 90);
         const scoreB = isBaseB * 80 + b.points + (Math.random() * 90);
         return scoreB - scoreA;
@@ -1134,13 +1134,13 @@ class SzabolcsGame {
     this.animTimeouts.push(t);
   }
 
-  // ==========================================
-  // BRIEFING / FELKÉSZÜLÉSI MODÁLIS ABLAK
-  // ==========================================
+  
+  
+  
   showBriefingModal(context) {
     this.actionLocked = true;
     clearInterval(this.briefingTimer);
-    this.briefingTimeLeft = 2; // Alapértelmezett 2 másodperc automatikus várakozás
+    this.briefingTimeLeft = 2; 
 
     this.dom.modalOverlay.style.display = 'flex';
     this.dom.modalOverlay.classList.add('active');
@@ -1209,9 +1209,9 @@ class SzabolcsGame {
     this.presentTriviaQuestion(this.phase === 'BATTLE' ? 'BATTLE' : 'EXPANSION');
   }
 
-  // ==========================================
-  // KVÍZ MOTOR: Intelligens paklirendszer és ismétlésgátló
-  // ==========================================
+  
+  
+  
   initQuestionDecks() {
     let recentQuestions = [];
     try {
@@ -1221,7 +1221,7 @@ class SzabolcsGame {
       recentQuestions = [];
     }
 
-    // Keverő segédfüggvény (Fisher-Yates)
+    
     const shuffleArray = (arr) => {
       const copy = [...arr];
       for (let i = copy.length - 1; i > 0; i--) {
@@ -1231,7 +1231,7 @@ class SzabolcsGame {
       return copy;
     };
 
-    // A legutóbbi játékokban már megválaszolt kérdések a pakli legvégére kerülnek
+    
     const createDeck = (pool) => {
       if (!pool || pool.length === 0) return [];
       const shuffled = shuffleArray(pool);
@@ -1261,7 +1261,7 @@ class SzabolcsGame {
       this.initQuestionDecks();
     }
 
-    // Kiegyensúlyozott, dinamikus típusválasztás (choice vs guess)
+    
     let isGuess = false;
     if (this.lastQuestionType === 'guess') {
       isGuess = Math.random() < 0.35;
@@ -1277,7 +1277,7 @@ class SzabolcsGame {
       deck = isGuess ? this.guessDeck : this.choiceDeck;
     }
 
-    // Megkeressük az első olyan kérdést a pakliból, ami még nem volt ebben a mérkőzésben
+    
     let chosenIdx = -1;
     for (let i = 0; i < deck.length; i++) {
       if (!this.matchUsedQuestions.has(deck[i].q)) {
@@ -1286,7 +1286,7 @@ class SzabolcsGame {
       }
     }
 
-    // Ha az egész paklit végigjátszották a meccsben, bármelyik lapot engedjük
+    
     if (chosenIdx === -1) {
       chosenIdx = 0;
     }
@@ -1295,7 +1295,7 @@ class SzabolcsGame {
     this.matchUsedQuestions.add(question.q);
     this.lastQuestionType = isGuess ? 'guess' : 'choice';
 
-    // Előzmény frissítése a böngészőben (max utolsó 100 kérdés)
+    
     try {
       let recent = [];
       const stored = localStorage.getItem('szabolcs_recent_questions');
@@ -1331,7 +1331,7 @@ class SzabolcsGame {
       context: context
     };
 
-    // Véletlenszerű válaszkeverés
+    
     if (this.currentQuestion.type === 'choice') {
       const originalChoices = [...rawQ.a];
       const correctText = originalChoices[rawQ.correct];
@@ -1352,7 +1352,7 @@ class SzabolcsGame {
 
     const isHumanParticipating = this.isHumanParticipatingInCurrentQuestion();
 
-    // Nézői mód: szimplán letiltjuk az inputokat, semmi szöveges banner
+    
     if (this.dom.spectatorBanner) {
       this.dom.spectatorBanner.style.display = 'none';
     }
@@ -1421,7 +1421,7 @@ class SzabolcsGame {
     });
   }
 
-  // Tippelős kezelőfelület: A KEZDŐ ÉRTÉK MINDIG KIFEJEZETTEN 0!
+  
   setupGuessControls() {
     const q = this.currentQuestion;
     const isHumanParticipating = this.isHumanParticipatingInCurrentQuestion();
@@ -1430,7 +1430,7 @@ class SzabolcsGame {
     const calcMax = Math.max(100, Math.ceil(q.answer * 2.2 / 50) * 50);
     this.dom.guessSlider.max = Math.max(q.max, calcMax);
 
-    // Kifejezetten 0 a kezdő érték, ahogyan a felhasználó kérte!
+    
     this.dom.guessSlider.value = 0;
     this.dom.guessInput.value = 0;
     this.dom.guessUnit.innerText = q.unit || '';
@@ -1447,7 +1447,7 @@ class SzabolcsGame {
       this.dom.guessSlider.disabled = false;
       document.querySelectorAll('.btn-adjust').forEach(b => b.disabled = false);
 
-      // Fókusz az azonnali gépeléshez
+      
       setTimeout(() => {
         if (this.dom.guessInput) {
           this.dom.guessInput.focus();
@@ -1479,47 +1479,47 @@ class SzabolcsGame {
     }, 1000);
   }
 
-  // ==========================================
-  // BOT VÁLASZ GENERÁTOR (EGYJÁTÉKOS MÓDBAN GYENGÉBB, EMBERIBB)
-  // ==========================================
+  
+  
+  
   generateBotAnswer(botPlayer) {
     if (!this.currentQuestion) return 0;
     const isSinglePlayer = !this.isOnlineGame;
 
     if (this.currentQuestion.type === 'choice') {
       const correctIdx = this.currentQuestion.shuffledCorrectIndex;
-      // Egyjátékos módban a bot találati aránya ~45% (fair, legyőzhető),
-      // online multiplayerben a helyettesítő botok ~65%-os aránnyal bírnak
+      
+      
       const hitChance = isSinglePlayer ? 0.45 : 0.65;
       const isCorrect = Math.random() < hitChance;
 
       if (isCorrect) {
         return correctIdx;
       } else {
-        // Hibás válasz: a bot biztosan a 3 rossz válasz közül választ egyet, hogy ne találjon be véletlenül
+        
         const wrongChoices = [0, 1, 2, 3].filter(i => i !== correctIdx);
         return wrongChoices[Math.floor(Math.random() * wrongChoices.length)];
       }
     } else {
-      // Tippelős / becslős kérdés
+      
       const trueVal = this.currentQuestion.answer;
 
       if (isSinglePlayer) {
-        // Egyjátékosban emberibb, életszerűbb hibahatár, hogy a játékos reálisan nyerhessen
+        
         if (trueVal >= 1000 && trueVal <= 2050) {
-          // Évszám jellegű kérdéseknél: +/- 25-110 év mellélövés
+          
           const sign = Math.random() < 0.5 ? -1 : 1;
           const yearDiff = sign * Math.round(25 + Math.random() * 85);
           return Math.max(1, trueVal + yearDiff);
         } else {
-          // Általános mennyiségi kérdéseknél (terület, lakosság, magasság): 25% - 65% szórás
+          
           const sign = Math.random() < 0.5 ? -1 : 1;
           const pct = sign * (0.25 + Math.random() * 0.40);
           const variance = pct * trueVal;
           return Math.round(Math.max(0, trueVal + variance));
         }
       } else {
-        // Online módban kiegyensúlyozottabb botok
+        
         const variance = (Math.random() * 0.4 - 0.2) * trueVal;
         return Math.round(Math.max(0, trueVal + variance));
       }
@@ -1533,8 +1533,8 @@ class SzabolcsGame {
 
     this.players.forEach(p => {
       if (p.isBot && p.alive) {
-        // Ha a játékos csak néző (bot vs bot), a botok gyorsan döntenek (1.2 - 2.2 mp)
-        // Egyjátékosban több gondolkodási időt hagyunk a játékosnak (4.5 - 9.5 mp), így könnyebben válaszolhat elsőként
+        
+        
         const delay = isSpectator
           ? (1200 + Math.random() * 1000)
           : (isSinglePlayer ? (4500 + Math.random() * 4500) : (3500 + Math.random() * 4000));
@@ -1553,7 +1553,7 @@ class SzabolcsGame {
     });
   }
 
-  // Azonnali felgyorsítás a játékos válasza után: Zéró lag, azonnali élmény!
+  
   accelerateRemainingBots() {
     if (this.isOnlineGame && !this.isHost) return;
     this.botTimeouts.forEach(t => clearTimeout(t));
@@ -1565,7 +1565,7 @@ class SzabolcsGame {
     ).filter(p => p && p.isBot && p.alive && this.playerAnswers[p.id] === undefined);
 
     relevantBots.forEach((p, idx) => {
-      const quickDelay = 220 + idx * 220; // 220ms, 440ms
+      const quickDelay = 220 + idx * 220; 
       const t = setTimeout(() => {
         if (!this.playerAnswers[p.id] && this.timeLeft > 0) {
           const answerVal = this.generateBotAnswer(p);
@@ -1597,7 +1597,7 @@ class SzabolcsGame {
       diff: diff
     };
 
-    // Ha a humán játékos adott választ: segítség-gombok frissítése és bot-gyorsítás
+    
     if (playerId === (this.isOnlineGame ? this.myPlayerId : this.players[0].id)) {
       this.updateLifelineButtons();
       if (this.dom.answerStatusPill) {
@@ -1653,7 +1653,7 @@ class SzabolcsGame {
 
     const isGuess = (this.currentQuestion.type === 'guess');
 
-    // Hatalmas, látványos kiemelt banner a pontos helyes válasznak
+    
     const banner = document.createElement('div');
     banner.className = 'reveal-exact-banner';
 
@@ -1730,7 +1730,7 @@ class SzabolcsGame {
     });
     this.dom.revealBox.appendChild(nextBtn);
 
-    // 4.2 másodperc a kényelmes leolvasáshoz
+    
     const t = setTimeout(advance, 4200);
     this.animTimeouts.push(t);
   }
@@ -1762,9 +1762,9 @@ class SzabolcsGame {
     return list;
   }
 
-  // ==========================================
-  // HONFOGLALÁSI KÖR FELOLDÁSA
-  // ==========================================
+  
+  
+  
   resolveExpansionRound(ranked) {
     this.closeModal();
 
@@ -1801,7 +1801,7 @@ class SzabolcsGame {
       return;
     }
 
-    // Aktuális választó kijelölése
+    
     this.currentPicker = this.pendingConquerors.shift();
     this.highlightActiveCard(this.players.indexOf(this.currentPicker));
 
@@ -1849,8 +1849,8 @@ class SzabolcsGame {
     }
   }
 
-  // Szomszédossági szabály: kizárólag a meglévő területek szomszédjai választhatók,
-  // kivéve ha nincs szomszédos szabad terület (vagy a legvégén, mikor csak távoli maradt).
+  
+  
   getValidExpansionTargets(player) {
     const freeCities = this.mapData.cities.filter(c => !this.territoryOwners[c.id]);
     if (freeCities.length === 0) return [];
@@ -1900,7 +1900,7 @@ class SzabolcsGame {
       if (this.currentPicker.isBot) return;
     }
 
-    if (this.territoryOwners[city.id]) return; // Már foglalt
+    if (this.territoryOwners[city.id]) return; 
 
     const validTargets = this.getValidExpansionTargets(this.currentPicker);
     if (!validTargets.some(t => t.id === city.id)) {
@@ -1909,7 +1909,7 @@ class SzabolcsGame {
       return;
     }
 
-    // AZONNALI ZÁROLÁS: Több kattintás teljesen kizárva!
+    
     this.actionLocked = true;
     const picker = this.currentPicker;
     this.currentPicker = null;
@@ -1963,9 +1963,9 @@ class SzabolcsGame {
     this.logEvent(`🚩 ${player.name} birtokba vette ${city.name} városát (+${city.points} pt)!`, player.color);
   }
 
-  // ==========================================
-  // CSATA KÖR FELOLDÁSA & FOLYAMATOS VÁROSTROM
-  // ==========================================
+  
+  
+  
   resolveBattleRound(ranked) {
     this.closeModal();
 
@@ -1984,7 +1984,7 @@ class SzabolcsGame {
         this.updateCastleBadge(targetCity, defender, defender.towers);
 
         if (defender.towers <= 0) {
-          // Bázis elesett -> Védő kiesett, minden városa a hódítóé!
+          
           defender.alive = false;
           sounds.playVictory();
           this.updateCastleBadge(targetCity, defender, 0);
@@ -2003,7 +2003,7 @@ class SzabolcsGame {
           this.updatePlayerScorecards();
           this.advanceBattleTurn();
         } else {
-          // VÁR MÉG ÁLL: AZ OSTROMLÓ ADDIG JÖN, AMÍG EL NEM BUKJA A KÉRDÉST!
+          
           this.updatePlayerScorecards();
           this.updateTurnBanner(`💥 SIKERES ROHAM! 1 torony ledőlt (${defender.towers}/3 torony maradt)! ${attacker.name} folytatja a vár ostromát!`, 'Várharc');
           this.logEvent(`💥 SIKERES ROHAM! 1 torony ledőlt (${defender.towers}/3 torony maradt)! ${attacker.name} újabb rohamot indít ${targetCity.name} falai ellen!`, attacker.color);
@@ -2014,7 +2014,7 @@ class SzabolcsGame {
           this.animTimeouts.push(t);
         }
       } else {
-        // Sima terület elfoglalása
+        
         this.territoryOwners[targetCity.id] = attacker.id;
         attacker.score += targetCity.points;
         defender.score = Math.max(0, defender.score - targetCity.points);
@@ -2030,7 +2030,7 @@ class SzabolcsGame {
         this.advanceBattleTurn();
       }
     } else {
-      // Védő sikeresen visszaverte az ostromot / támadást!
+      
       sounds.playCorrect();
       this.updateTurnBanner(`🛡️ ${defender.name} sikeresen megvédte ${targetCity.name} falait!`, 'Sikeres védelem');
       this.logEvent(`🛡️ ${defender.name} visszaverte ${attacker.name} támadását ${targetCity.name} falainál! Az ostrom megszakadt.`, defender.color);
@@ -2040,9 +2040,9 @@ class SzabolcsGame {
     }
   }
 
-  // ==========================================
-  // SEGÍTSÉGEK (LIFELINES) KEZELÉSE
-  // ==========================================
+  
+  
+  
   updateLifelineButtons() {
     const p1 = this.players[0];
     const isHumanParticipating = this.isHumanParticipatingInCurrentQuestion();
@@ -2096,7 +2096,7 @@ class SzabolcsGame {
         badge.innerText = '⭐ BIZTOS VÁLASZ!';
         targetBtn.appendChild(badge);
       }
-      // Automatikusan kiválasztja és beküldi a helyes választ!
+      
       targetBtn.click();
     } else {
       this.handlePlayerAnswer(p1.id, correctIdx);
@@ -2124,13 +2124,13 @@ class SzabolcsGame {
     this.dom.guessInput.classList.add('hint-applied');
     this.logEvent(`🎯 ${p1.name} segítséget kért: a hadmérnök beállította a precíz értéket (${nearVal})!`, 'gold');
 
-    // Automatikusan beküldi a precíz tippet!
+    
     this.submitGuess();
   }
 
-  // ==========================================
-  // SEGÉDFUNKCIÓK (UI & LOG)
-  // ==========================================
+  
+  
+  
   cleanTargetableCells() {
     this.mapData.cities.forEach(c => {
       const poly = document.getElementById(`poly-${c.id}`);
@@ -2221,9 +2221,9 @@ class SzabolcsGame {
     this.dom.startModal.style.display = 'none';
   }
 
-  // ==========================================
-  // ONLINE MULTIPLAYER METÓDUSOK & SZINKRONIZÁCIÓ
-  // ==========================================
+  
+  
+  
   startOnlineMultiplayerGame(roster, myPlayerId, isHost) {
     this.resetAllTimers();
     this.isOnlineGame = true;
@@ -2412,7 +2412,7 @@ class SzabolcsGame {
       this.multiplayer.showNotification(`${playerName} kilépett, átvette a gép!`);
     }
 
-    // Gazdacsere ellenőrzése: ha a szerver kijelölt minket, vagy mi vagyunk az első megmaradt élő ember
+    
     let becameHostNow = false;
     if (newHostPlayerId === this.myPlayerId) {
       becameHostNow = true;
@@ -2428,7 +2428,7 @@ class SzabolcsGame {
       if (this.multiplayer) this.multiplayer.isHost = true;
       this.logEvent(`👑 Te lettél a meccs új szobagazdája, a játék zavartalanul halad tovább!`, '#d4af37');
 
-      // Ha épp a briefing modálban voltunk és a kérdésre vártunk:
+      
       if (this.dom.briefingModal && this.dom.briefingModal.style.display !== 'none') {
         clearInterval(this.briefingTimer);
         this.launchQuestionModal();
@@ -2453,7 +2453,7 @@ class SzabolcsGame {
     }
   }
 
-  // Online módban: távoli segítségkérés fogadása (meglévő válaszon nem változtat, csak naplóz)
+  
   applyRemoteLifeline(playerId, type, details) {
     const p = this.players.find(x => x.id === playerId);
     if (!p) return;
