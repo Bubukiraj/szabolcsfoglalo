@@ -33,7 +33,7 @@ class SzabolcsGame {
     this.animTimeouts = [];
 
     this.timeLeft = 20;
-    this.briefingTimeLeft = 5;
+    this.briefingTimeLeft = 2;
     this.currentQuestion = null;
     this.playerAnswers = {};
     this.pendingConquerors = [];
@@ -1472,7 +1472,7 @@ class SzabolcsGame {
 
     const timeSpent = (customTimeSpent !== null) ? customTimeSpent : Math.max(0.1, 20 - this.timeLeft);
     let isCorrect = false;
-    let diff = Infinity;
+    let diff = 999999;
 
     if (this.currentQuestion.type === 'choice') {
       isCorrect = (answer === this.currentQuestion.shuffledCorrectIndex);
@@ -2262,7 +2262,7 @@ class SzabolcsGame {
         const ownerId = this.territoryOwners[c.id];
         const poly = document.getElementById(`poly-${c.id}`);
         if (poly) {
-          poly.setAttribute('class', ownerId ? `territory-cell ${ownerId}` : 'territory-cell neutral');
+          poly.setAttribute('class', ownerId ? `territory-cell ${ownerId}-owner` : 'territory-cell neutral');
         }
       });
     }
@@ -2339,6 +2339,12 @@ class SzabolcsGame {
     }
   }
 
+  // Online módban: távoli segítségkérés fogadása (meglévő válaszon nem változtat, csak naplóz)
+  applyRemoteLifeline(playerId, type, details) {
+    const p = this.players.find(x => x.id === playerId);
+    if (!p) return;
+    this.logEvent(`💡 ${p.name} segítséget vett igénybe (${type === 'choice' ? 'helyes válasz' : 'tipp közelítő'})!`, p.color);
+  }
 
 }
 
@@ -2347,3 +2353,4 @@ window.addEventListener('DOMContentLoaded', () => {
   window.szabolcsGame = game;
   game.init();
 });
+
