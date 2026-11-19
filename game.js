@@ -241,6 +241,9 @@ class SzabolcsGame {
   // ==========================================
   // TÉRKÉP KIRAJZOLÁSA (SVG)
   // ==========================================
+  // ==========================================
+  // TÉRKÉP KIRAJZOLÁSA (SVG)
+  // ==========================================
   renderMap() {
     const W = this.mapData.width;
     const H = this.mapData.height;
@@ -256,9 +259,107 @@ class SzabolcsGame {
       <marker id="arrow-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
         <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#ff4757" />
       </marker>
+      <filter id="cartouche-shadow" x="-10%" y="-10%" width="120%" height="120%">
+        <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#1a0f0a" flood-opacity="0.35" />
+      </filter>
     `;
     this.dom.svgMap.appendChild(defs);
 
+    // ==========================================
+    // 1. TÖRTÉNELMI DÍSZÍTŐ RÉTEG A TÉRKÉP HÁTTERÉBEN
+    // ==========================================
+    const decorGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    decorGroup.setAttribute('class', 'vintage-decorations');
+    decorGroup.setAttribute('pointer-events', 'none');
+
+    // Navigációs loxodroma vonalak (Rhumb lines) a bal felső és jobb alsó sarokból
+    let rhumbLinesHtml = '';
+    const angles = [0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5, 270, 292.5, 315, 337.5];
+    angles.forEach(deg => {
+      const rad = deg * (Math.PI / 180);
+      const x2 = 105 + Math.cos(rad) * 900;
+      const y2 = 115 + Math.sin(rad) * 900;
+      rhumbLinesHtml += `<line x1="105" y1="115" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#b89358" stroke-width="0.7" opacity="0.22" stroke-dasharray="8,6" />`;
+      
+      const x3 = 830 + Math.cos(rad) * 700;
+      const y3 = 580 + Math.sin(rad) * 700;
+      rhumbLinesHtml += `<line x1="830" y1="580" x2="${x3.toFixed(1)}" y2="${y3.toFixed(1)}" stroke="#b89358" stroke-width="0.6" opacity="0.18" stroke-dasharray="6,8" />`;
+    });
+
+    decorGroup.innerHTML = `
+      <!-- Antik térkép kettős díszkeret -->
+      <rect x="8" y="8" width="934" height="684" fill="none" stroke="#7a552b" stroke-width="2.5" rx="5" />
+      <rect x="13" y="13" width="924" height="674" fill="none" stroke="#c8a84e" stroke-width="1" stroke-dasharray="8,4" opacity="0.6" />
+
+      <!-- Barokk sarokornamentika a 4 sarokban -->
+      <!-- Bal felső -->
+      <path d="M 14,35 Q 28,28 35,14 M 14,48 Q 42,42 48,14 M 22,22 L 32,32" stroke="#8b6914" stroke-width="1.5" fill="none" opacity="0.75" />
+      <circle cx="28" cy="28" r="3" fill="#8b6914" opacity="0.6" />
+      <!-- Jobb felső -->
+      <path d="M 936,35 Q 922,28 915,14 M 936,48 Q 908,42 902,14 M 928,22 L 918,32" stroke="#8b6914" stroke-width="1.5" fill="none" opacity="0.75" />
+      <circle cx="922" cy="28" r="3" fill="#8b6914" opacity="0.6" />
+      <!-- Bal alsó -->
+      <path d="M 14,665 Q 28,672 35,686 M 14,652 Q 42,658 48,686 M 22,678 L 32,668" stroke="#8b6914" stroke-width="1.5" fill="none" opacity="0.75" />
+      <circle cx="28" cy="672" r="3" fill="#8b6914" opacity="0.6" />
+      <!-- Jobb alsó -->
+      <path d="M 936,665 Q 922,672 915,686 M 936,652 Q 908,658 902,686 M 928,678 L 918,668" stroke="#8b6914" stroke-width="1.5" fill="none" opacity="0.75" />
+      <circle cx="922" cy="672" r="3" fill="#8b6914" opacity="0.6" />
+
+      <!-- Koncentrikus navigációs körök -->
+      <circle cx="105" cy="115" r="90" fill="none" stroke="#b89358" stroke-width="0.8" stroke-dasharray="3,5" opacity="0.25" />
+      <circle cx="105" cy="115" r="180" fill="none" stroke="#b89358" stroke-width="0.6" stroke-dasharray="4,6" opacity="0.18" />
+      <circle cx="830" cy="580" r="110" fill="none" stroke="#b89358" stroke-width="0.8" stroke-dasharray="3,5" opacity="0.22" />
+
+      <!-- Sugaras navigációs vonalak -->
+      ${rhumbLinesHtml}
+
+      <!-- Történelmi szomszédos tájegységek antik vízjelei a háttérben -->
+      <text x="780" y="85" class="vintage-region-watermark" transform="rotate(-6 780 85)">• UNG ÉS BEREG VÁRMEGYE •</text>
+      <text x="145" y="275" class="vintage-region-watermark" transform="rotate(-18 145 275)">• ZEMPLÉN VÁRMEGYE •</text>
+      <text x="95" y="495" class="vintage-region-watermark" transform="rotate(28 95 495)">• HAJDÚ KERÜLET •</text>
+      <text x="825" y="635" class="vintage-region-watermark" transform="rotate(-10 825 635)">• SZATMÁR VÁRMEGYE •</text>
+      <text x="880" y="230" class="vintage-region-watermark" transform="rotate(50 880 230)">KÁRPÁTALJA</text>
+
+      <!-- Antik vitorlás sószállító hajó a Tisza felső kanyarulatánál -->
+      <g class="tisza-ship" opacity="0.5" transform="translate(262, 235) scale(0.9)">
+        <path d="M -16,5 Q 0,11 16,5 L 12,10 Q 0,14 -12,10 Z" fill="#4a3524" stroke="#2c1810" stroke-width="1.2" />
+        <line x1="0" y1="5" x2="0" y2="-17" stroke="#2c1810" stroke-width="1.6" />
+        <path d="M 0,-15 Q 10,-8 0,-2 Z" fill="#ffffff" stroke="#8b6914" stroke-width="1" />
+        <path d="M 0,-15 Q -8,-9 0,-3 Z" fill="#f5e8cc" stroke="#8b6914" stroke-width="0.8" />
+        <text x="0" y="22" class="vintage-ship-label">A szőke Tisza</text>
+      </g>
+
+      <!-- Díszes antik térkép címertábla és lépték (Cartouche) a bal alsó sarokban -->
+      <g class="map-cartouche" transform="translate(30, 580)" filter="url(#cartouche-shadow)">
+        <rect x="0" y="0" width="205" height="92" rx="6" fill="#fdf7ea" stroke="#7a552b" stroke-width="2" />
+        <rect x="4" y="4" width="197" height="84" rx="4" fill="none" stroke="#c8a84e" stroke-width="1" />
+        
+        <!-- Korona és kardok miniatűr motívum -->
+        <text x="102" y="19" font-family="'Cinzel', serif" font-size="12" text-anchor="middle" fill="#8b6914">⚔ 👑 ⚔</text>
+        <text x="102" y="34" class="cartouche-title">SZABOLCSI HADITÉRKÉP</text>
+        <text x="102" y="46" class="cartouche-subtitle">Királyi Műveltségi Hadjárat • Anno Domini</text>
+        
+        <line x1="25" y1="52" x2="180" y2="52" stroke="#c8a84e" stroke-width="0.8" />
+        
+        <!-- Grafikus lépték (Scale bar) -->
+        <g transform="translate(28, 58)">
+          <rect x="0" y="0" width="37" height="5" fill="#2c1810" stroke="#7a552b" stroke-width="0.8" />
+          <rect x="37" y="0" width="37" height="5" fill="#c8a84e" stroke="#7a552b" stroke-width="0.8" />
+          <rect x="74" y="0" width="37" height="5" fill="#2c1810" stroke="#7a552b" stroke-width="0.8" />
+          <rect x="111" y="0" width="37" height="5" fill="#c8a84e" stroke="#7a552b" stroke-width="0.8" />
+          
+          <text x="0" y="15" class="scale-text">0</text>
+          <text x="74" y="15" class="scale-text">15</text>
+          <text x="148" y="15" class="scale-text">30 km</text>
+          <text x="74" y="24" class="scale-label">Magyar mérföld lépték</text>
+        </g>
+      </g>
+    `;
+    this.dom.svgMap.appendChild(decorGroup);
+
+    // ==========================================
+    // 2. VÁRMEGYE ALAP ÉS VORONOI CELLÁK
+    // ==========================================
     const bgGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     bgGroup.innerHTML = `
       <path class="county-shadow" d="${this.mapData.border_path}" transform="translate(4, 6)" />
@@ -290,7 +391,7 @@ class SzabolcsGame {
     borderOutline.setAttribute('d', this.mapData.border_path);
     borderOutline.setAttribute('fill', 'none');
     borderOutline.setAttribute('stroke', '#8b6914');
-    borderOutline.setAttribute('stroke-width', '2.5');
+    borderOutline.setAttribute('stroke-width', '2.8');
     borderOutline.setAttribute('pointer-events', 'none');
     this.dom.svgMap.appendChild(borderOutline);
 
@@ -311,8 +412,8 @@ class SzabolcsGame {
       <path d="${szamosPath}" class="river-main" />
       <path d="${krasznaPath}" class="river-glow" />
       <path d="${krasznaPath}" class="river-main" />
-      <text x="210" y="275" class="river-label" transform="rotate(-15 210 275)">Tisza</text>
-      <text x="735" y="405" class="river-label" transform="rotate(-40 735 405)">Szamos</text>
+      <text x="210" y="275" class="river-label" transform="rotate(-15 210 275)">TISZA</text>
+      <text x="735" y="405" class="river-label" transform="rotate(-40 735 405)">SZAMOS</text>
     `;
     this.dom.svgMap.appendChild(riverGroup);
 
@@ -322,32 +423,32 @@ class SzabolcsGame {
     compassGroup.setAttribute('transform', 'translate(105, 115)');
     compassGroup.setAttribute('pointer-events', 'none');
     compassGroup.innerHTML = `
-      <circle r="40" fill="none" stroke="#8b6914" stroke-width="1.2" stroke-dasharray="2,3" opacity="0.6" />
-      <circle r="34" fill="rgba(245,230,200,0.7)" stroke="#c8a84e" stroke-width="1.8" />
-      <circle r="26" fill="none" stroke="#8b6914" stroke-width="0.8" opacity="0.5" />
-      <polygon points="0,-32 4,-9 0,0" fill="#c8a84e" />
-      <polygon points="0,-32 -4,-9 0,0" fill="#5a3e2b" />
-      <polygon points="0,32 4,9 0,0" fill="#5a3e2b" />
-      <polygon points="0,32 -4,9 0,0" fill="#c8a84e" />
-      <polygon points="32,0 9,4 0,0" fill="#c8a84e" />
-      <polygon points="32,0 9,-4 0,0" fill="#5a3e2b" />
-      <polygon points="-32,0 -9,4 0,0" fill="#5a3e2b" />
-      <polygon points="-32,0 -9,-4 0,0" fill="#c8a84e" />
-      <polygon points="21,-21 7,-2 0,0" fill="#c8a84e" opacity="0.8" />
-      <polygon points="21,-21 2,-7 0,0" fill="#5a3e2b" opacity="0.8" />
-      <polygon points="-21,-21 -2,-7 0,0" fill="#c8a84e" opacity="0.8" />
-      <polygon points="-21,-21 -7,-2 0,0" fill="#5a3e2b" opacity="0.8" />
-      <polygon points="21,21 2,7 0,0" fill="#c8a84e" opacity="0.8" />
-      <polygon points="21,21 7,2 0,0" fill="#5a3e2b" opacity="0.8" />
-      <polygon points="-21,21 -7,2 0,0" fill="#c8a84e" opacity="0.8" />
-      <polygon points="-21,21 -2,7 0,0" fill="#5a3e2b" opacity="0.8" />
-      <circle r="3" fill="#3d2b1f" stroke="#c8a84e" stroke-width="1" />
-      <text x="0" y="-37" font-family="'Cinzel', serif" font-size="11" font-weight="900" fill="#b22222" text-anchor="middle">É</text>
-      <text x="39" y="4" font-family="'Cinzel', serif" font-size="10" font-weight="800" fill="#3d2b1f" text-anchor="middle">K</text>
-      <text x="0" y="45" font-family="'Cinzel', serif" font-size="10" font-weight="800" fill="#3d2b1f" text-anchor="middle">D</text>
-      <text x="-40" y="4" font-family="'Cinzel', serif" font-size="10" font-weight="800" fill="#3d2b1f" text-anchor="middle">NY</text>
-      <text x="0" y="65" font-family="'Cinzel', serif" font-size="10" font-weight="900" fill="#3d2b1f" text-anchor="middle" letter-spacing="1.5">SZABOLCS</text>
-      <text x="0" y="77" font-family="'Lora', serif" font-style="italic" font-size="8.5" fill="#8b6914" text-anchor="middle">Vármegye</text>
+      <circle r="42" fill="none" stroke="#8b6914" stroke-width="1.4" stroke-dasharray="2,3" opacity="0.6" />
+      <circle r="35" fill="rgba(255,248,235,0.88)" stroke="#c8a84e" stroke-width="2" />
+      <circle r="27" fill="none" stroke="#8b6914" stroke-width="0.9" opacity="0.5" />
+      <polygon points="0,-34 4,-9 0,0" fill="#c8a84e" />
+      <polygon points="0,-34 -4,-9 0,0" fill="#5a3e2b" />
+      <polygon points="0,34 4,9 0,0" fill="#5a3e2b" />
+      <polygon points="0,34 -4,9 0,0" fill="#c8a84e" />
+      <polygon points="34,0 9,4 0,0" fill="#c8a84e" />
+      <polygon points="34,0 9,-4 0,0" fill="#5a3e2b" />
+      <polygon points="-34,0 -9,4 0,0" fill="#5a3e2b" />
+      <polygon points="-34,0 -9,-4 0,0" fill="#c8a84e" />
+      <polygon points="22,-22 7,-2 0,0" fill="#c8a84e" opacity="0.85" />
+      <polygon points="22,-22 2,-7 0,0" fill="#5a3e2b" opacity="0.85" />
+      <polygon points="-22,-22 -2,-7 0,0" fill="#c8a84e" opacity="0.85" />
+      <polygon points="-22,-22 -7,-2 0,0" fill="#5a3e2b" opacity="0.85" />
+      <polygon points="22,22 2,7 0,0" fill="#c8a84e" opacity="0.85" />
+      <polygon points="22,22 7,2 0,0" fill="#5a3e2b" opacity="0.85" />
+      <polygon points="-22,22 -7,2 0,0" fill="#c8a84e" opacity="0.85" />
+      <polygon points="-22,22 -2,7 0,0" fill="#5a3e2b" opacity="0.85" />
+      <circle r="3.5" fill="#2c1810" stroke="#ffd700" stroke-width="1.2" />
+      <text x="0" y="-39" class="compass-label compass-north">É</text>
+      <text x="42" y="4.5" class="compass-label">K</text>
+      <text x="0" y="49" class="compass-label">D</text>
+      <text x="-43" y="4.5" class="compass-label">NY</text>
+      <text x="0" y="68" font-family="'Cinzel', serif" font-size="10.5" font-weight="900" fill="#2c1810" text-anchor="middle" letter-spacing="1.5">SZABOLCS</text>
+      <text x="0" y="80" font-family="'Lora', serif" font-style="italic" font-size="9" font-weight="700" fill="#8b6914" text-anchor="middle">Vármegye</text>
     `;
     this.dom.svgMap.appendChild(compassGroup);
 
@@ -356,7 +457,7 @@ class SzabolcsGame {
     battleLayer.setAttribute('id', 'battle-layer');
     this.dom.svgMap.appendChild(battleLayer);
 
-    // Város jelölők és feliratok (a felirat lejjebb helyezve, a vár pedig felülre, így sosem fedik egymást!)
+    // Város jelölők és feliratok (kristálytiszta, nagy kontrasztú feliratokkal)
     const nodesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     nodesGroup.setAttribute('class', 'city-nodes-group');
 
@@ -371,9 +472,19 @@ class SzabolcsGame {
       castleG.style.display = 'none';
 
       g.innerHTML = `
-        <circle class="city-point" cx="${c.x}" cy="${c.y}" r="4" />
-        <text class="city-label" x="${c.x}" y="${c.y + 14}">${c.name}</text>
-        <text class="city-points-badge" x="${c.x}" y="${c.y + 26}">${c.points} pt</text>
+        <!-- Város bástya pont: 3 rétegű királyi arany-rubin jelölő -->
+        <circle cx="${c.x}" cy="${c.y}" r="6.5" class="city-point-outer" />
+        <circle cx="${c.x}" cy="${c.y}" r="3.8" class="city-point-inner" />
+        <circle cx="${c.x}" cy="${c.y}" r="1.2" fill="#ffffff" />
+
+        <!-- Város neve: vastag, tiszta fehér körvonallal és árnyékkal a 100%-os láthatóságért -->
+        <text class="city-label" x="${c.x}" y="${c.y + 15}">${c.name}</text>
+
+        <!-- Pontszám jelvény: elegáns arany keretes bőrtáblácska -->
+        <g class="city-badge-wrap" transform="translate(${c.x}, ${c.y + 25})">
+          <rect x="-24" y="-8.5" width="48" height="15" rx="7.5" class="city-points-rect" />
+          <text class="city-points-badge" x="0" y="2.8">${c.points} pt</text>
+        </g>
       `;
       g.appendChild(castleG);
       nodesGroup.appendChild(g);
