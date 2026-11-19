@@ -1542,16 +1542,27 @@ class SzabolcsGame {
     this.currentPicker = this.pendingConquerors.shift();
     this.highlightActiveCard(this.players.indexOf(this.currentPicker));
 
+    const validTargets = this.getValidExpansionTargets(this.currentPicker);
+    const freeCount = freeCities.length;
+    const isAdjacentOnly = (validTargets.length < freeCount);
+
+    const bannerMsg = isAdjacentOnly
+      ? `🚩 Megnyerted a kört! Válassz egy SZOMSZÉDOS szabad várost!`
+      : `🚩 Megnyerted a kört! Válassz egy szabad várost!`;
+    const instrMsg = isAdjacentOnly
+      ? `Kattints a határaid mentén villogó SZOMSZÉDOS szabad városok egyikére!`
+      : `Mivel nincs közvetlen szomszédos szabad terület, bármelyik megmaradt várost választhatod!`;
+
     if (this.isOnlineGame) {
       if (this.currentPicker.id === this.myPlayerId) {
         this.actionLocked = false;
-        this.updateTurnBanner(`🚩 Megnyerted a kört! Válassz egy szabad várost!`, 'Honfoglalás');
-        this.setInstruction(`Kattints egy szabad városra a térképen az elfoglalásához!`);
-        this.markAvailableBaseCities();
+        this.updateTurnBanner(bannerMsg, 'Honfoglalás');
+        this.setInstruction(instrMsg);
+        this.markAvailableExpansionCities(this.currentPicker);
       } else {
         this.actionLocked = true;
         this.updateTurnBanner(`🚩 ${this.currentPicker.name} nyert! Területet választ a térképen...`, 'Honfoglalás');
-        this.setInstruction(`${this.currentPicker.name} szabad várost választ a térképen...`);
+        this.setInstruction(`${this.currentPicker.name} szomszédos szabad várost választ a térképen...`);
         this.cleanTargetableCells();
         if (this.currentPicker.isBot && this.isHost) {
           const t = setTimeout(() => this.botPickExpansionTerritory(this.currentPicker), 1200);
@@ -1569,10 +1580,50 @@ class SzabolcsGame {
       this.botTimeouts.push(t);
     } else {
       this.actionLocked = false;
-      this.updateTurnBanner(`🚩 ${this.currentPicker.name}, megnyerted a kört! Válassz egy szabad várost!`, 'Honfoglalás');
-      this.setInstruction(`${this.currentPicker.name}, megnyerted a kérdéskört! Kattints egy szabad városra az elfoglalásához!`);
-      this.markAvailableBaseCities();
+      this.updateTurnBanner(bannerMsg, 'Honfoglalás');
+      this.setInstruction(instrMsg);
+      this.markAvailableExpansionCities(this.currentPicker);
     }
+  }
+
+  // Szomszédossági szabály: kizárólag a meglévő területek szomszédjai választhatók,
+  // kivéve ha nincs szomszédos szabad terület (vagy a legvégén, mikor csak távoli maradt).
+  getValidExpansionTargets(player) {
+    const freeCities = this.mapData.cities.filter(c => !this.territoryOwners[c.id]);
+    if (freeCities.length === 0) return [];
+
+    const myCities = this.mapData.cities.filter(c => this.territoryOwners[c.id] === player.id);
+    if (myCities.length === 0) return freeCities;
+
+    const adjacentSet = new Set();
+    myCities.forEach(city => {
+      if (city.neighbors && Array.isArray(city.neighbors)) {
+        city.neighbors.forEach(neighborId => {
+          if (!this.territoryOwners[neighborId]) {
+            adjacentSet.add(neighborId);
+          }
+        });
+      }
+    });
+
+    const adjacentCities = Array.from(adjacentSet)
+      .map(id => this.mapData.cities.find(c => c.id === id))
+      .filter(Boolean);
+
+    if (adjacentCities.length > 0) {
+      return adjacentCities;
+    }
+    return freeCities;
+  }
+
+  markAvailableExpansionCities(player) {
+    this.cleanTargetableCells();
+    const validTargets = this.getValidExpansionTargets(player);
+    validTargets.forEach(c => {
+      const poly = document.getElementById(`poly-${c.id}`);
+      if (poly) poly.classList.add('targetable');
+    });
+    return validTargets;
   }
 
   handleExpansionTerritoryPick(city) {
@@ -1587,6 +1638,13 @@ class SzabolcsGame {
     }
 
     if (this.territoryOwners[city.id]) return; // Már foglalt
+
+    const validTargets = this.getValidExpansionTargets(this.currentPicker);
+    if (!validTargets.some(t => t.id === city.id)) {
+      sounds.playWrong();
+      this.setInstruction('⚠️ Csak a határaid mentén lévő SZOMSZÉDOS szabad várost választhatod!');
+      return;
+    }
 
     // AZONNALI ZÁROLÁS: Több kattintás teljesen kizárva!
     this.actionLocked = true;
@@ -1607,17 +1665,25 @@ class SzabolcsGame {
   }
 
   botPickExpansionTerritory(bot) {
-    const free = this.mapData.cities.filter(c => !this.territoryOwners[c.id]);
-    if (free.length === 0) {
+    const validTargets = this.getValidExpansionTargets(bot);
+    if (validTargets.length === 0) {
       this.processNextPendingConqueror();
       return;
     }
 
-    free.sort((a, b) => b.points - a.points);
-    const chosen = free[0];
+    validTargets.sort((a, b) => b.points - a.points);
+    const chosen = validTargets[0];
 
+    this.currentPicker = null;
     this.conquerTerritory(bot, chosen);
-    const t = setTimeout(() => this.processNextPendingConqueror(), 800);
+
+    if (this.isOnlineGame && this.isHost && this.multiplayer) {
+      this.multiplayer.sendAction('EXPANSION_PICK', { cityId: chosen.id, playerId: bot.id });
+    }
+
+    const t = setTimeout(() => {
+      this.processNextPendingConqueror();
+    }, 800);
     this.animTimeouts.push(t);
   }
 

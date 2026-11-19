@@ -1474,21 +1474,505 @@ footer {
 }
 
 /* ============ RESZPONZIVITÁS ============ */
+
+/* --- 1. LAPTOP ÉS ALACSONY KÉPERNYŐK (max-height: 850px, min-width: 769px) --- */
+/* Cél: 100%-ban elférjen görgetés nélkül a laptop képernyőkön */
+@media (max-height: 850px) and (min-width: 769px) {
+  body {
+    overflow: hidden;
+  }
+
+  .app-container {
+    height: 100vh;
+    max-height: 100vh;
+    padding: 6px 12px;
+    gap: 6px;
+    overflow: hidden;
+  }
+
+  header {
+    padding: 5px 14px;
+  }
+
+  .logo-icon {
+    font-size: 20px;
+  }
+
+  .title-wrap h1 {
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+
+  .title-wrap p {
+    font-size: 8.5px;
+  }
+
+  .phase-pill {
+    padding: 3px 10px;
+    font-size: 10.5px;
+  }
+
+  .btn-icon {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .players-bar {
+    gap: 6px;
+  }
+
+  .player-card {
+    padding: 4px 8px;
+  }
+
+  .player-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+  }
+
+  .player-details h3 {
+    font-size: 11.5px;
+  }
+
+  .player-status-tag {
+    font-size: 8.5px;
+  }
+
+  .player-score-badge {
+    font-size: 15px;
+  }
+
+  .score-label {
+    font-size: 8px;
+  }
+
+  .main-game-layout {
+    gap: 8px;
+    min-height: 0;
+    flex: 1;
+  }
+
+  .turn-banner {
+    padding: 4px 12px;
+    font-size: 11px;
+  }
+
+  .instruction-bar {
+    padding: 4px 12px;
+    font-size: 11px;
+  }
+
+  .map-panel {
+    min-height: 0;
+    flex: 1;
+  }
+
+  .map-svg-wrap {
+    padding: 4px;
+    min-height: 0;
+  }
+
+  svg#szabolcs-map {
+    max-height: calc(100vh - 215px);
+    min-height: 340px;
+  }
+
+  .sidebar {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-card {
+    min-height: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-header {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .log-scroll-area {
+    max-height: calc(100vh - 290px);
+    flex: 1;
+    min-height: 120px;
+  }
+
+  /* Modálok finomhangolása laptopon */
+  .modal-card {
+    padding: 16px 20px;
+    max-height: 94vh;
+    overflow-y: auto;
+  }
+
+  .quiz-header {
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+  }
+
+  .question-text {
+    font-size: 15px;
+    min-height: 38px;
+    margin-bottom: 10px;
+    line-height: 1.35;
+  }
+
+  .lifelines-bar {
+    margin-bottom: 10px;
+    gap: 6px;
+  }
+
+  .btn-lifeline {
+    padding: 4px 10px;
+    font-size: 10px;
+  }
+
+  .choices-grid {
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .choice-btn {
+    padding: 8px 12px;
+    font-size: 12.5px;
+  }
+
+  .choice-btn .key-letter {
+    width: 22px;
+    height: 22px;
+    font-size: 10.5px;
+  }
+
+  .guess-wrap {
+    gap: 8px;
+  }
+
+  .guess-input-container {
+    padding: 3px 14px;
+  }
+
+  .guess-number-input {
+    font-size: 28px;
+    height: 36px;
+  }
+
+  .btn-adjust {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .btn-primary {
+    padding: 7px 18px;
+    font-size: 12.5px;
+  }
+
+  .briefing-modal {
+    padding: 16px;
+  }
+
+  .combatants-row {
+    margin-bottom: 12px;
+  }
+
+  .combatant-avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  .stakes-box {
+    padding: 6px 10px;
+    margin-bottom: 12px;
+    font-size: 11.5px;
+  }
+}
+
+/* --- 2. TABLET ÉS KESKENY KÉPERNYŐK (max-width: 992px) --- */
 @media (max-width: 992px) {
   .main-game-layout {
     grid-template-columns: 1fr;
   }
-  .sidebar { order: 2; }
+  .sidebar {
+    order: 2;
+    margin-top: 6px;
+  }
+  .log-scroll-area {
+    max-height: 180px;
+  }
 }
 
-@media (max-width: 600px) {
-  .players-bar {
-    grid-template-columns: 1fr;
+/* --- 3. OKOSTELEFONOK (max-width: 768px) --- */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 6px 8px;
+    gap: 6px;
   }
+
+  header {
+    padding: 6px 10px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .logo-icon {
+    font-size: 20px;
+  }
+
+  .title-wrap h1 {
+    font-size: 15px;
+    letter-spacing: 1px;
+  }
+
+  .title-wrap p {
+    font-size: 8px;
+    display: none;
+  }
+
+  .header-center {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .phase-pill {
+    padding: 3px 8px;
+    font-size: 10.5px;
+  }
+
+  /* Játékos kártyák telefonon: EGYMÁS MELLETT 3 oszlopban maradnak, NEM nyúlnak le! */
+  .players-bar {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+  }
+
+  .player-card {
+    padding: 5px 6px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 2px;
+  }
+
+  .player-info-left {
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+    width: 100%;
+  }
+
+  .player-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .player-details {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .player-details h3 {
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .player-status-tag {
+    display: none;
+  }
+
+  .player-score-badge {
+    font-size: 14px;
+    text-align: center;
+    line-height: 1;
+  }
+
+  .score-label {
+    display: none;
+  }
+
+  .turn-banner {
+    padding: 5px 8px;
+    font-size: 11px;
+    flex-direction: column;
+    gap: 2px;
+    text-align: center;
+  }
+
+  .instruction-bar {
+    padding: 4px 8px;
+    font-size: 10.5px;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .map-panel {
+    border-radius: 4px;
+  }
+
+  .map-svg-wrap {
+    padding: 4px 2px;
+  }
+
+  svg#szabolcs-map {
+    max-height: 52vh;
+    min-height: 260px;
+    width: 100%;
+  }
+
+  /* Kvíz modál mobil nézet */
+  .modal-card {
+    width: 96%;
+    max-width: 100%;
+    padding: 14px 12px;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+
+  .quiz-header {
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+  }
+
+  .timer-circle {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .question-text {
+    font-size: 14px;
+    line-height: 1.4;
+    min-height: 36px;
+    margin-bottom: 10px;
+  }
+
+  .lifelines-bar {
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+
+  .btn-lifeline {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  /* Telefonon a válaszok 1 oszlopos kényelmes gombok legyenek */
   .choices-grid {
     grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
   }
-  .title-wrap h1 { font-size: 16px; }
+
+  .choice-btn {
+    padding: 10px 12px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+
+  /* Tippelős felület mobilra */
+  .guess-wrap {
+    gap: 8px;
+    width: 100%;
+  }
+
+  .guess-input-container {
+    padding: 4px 14px;
+    min-width: 170px;
+  }
+
+  .guess-number-input {
+    font-size: 28px;
+    width: 130px;
+  }
+
+  .guess-quick-btns {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    width: 100%;
+    max-width: 340px;
+  }
+
+  .btn-adjust {
+    padding: 8px 2px;
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .btn-primary {
+    width: 100%;
+    max-width: 320px;
+    padding: 11px 16px;
+    font-size: 13.5px;
+  }
+
+  /* Párbaj briefing modal mobilra */
+  .combatants-row {
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .combatant-avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  .combatant-name {
+    font-size: 11px;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .versus-swords {
+    font-size: 22px;
+  }
+
+  /* Várterem / Lobby mobilra */
+  .lobby-slots {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .mode-select-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+/* --- 4. KIS MOBILOK (max-width: 480px) --- */
+@media (max-width: 480px) {
+  .title-wrap h1 {
+    font-size: 13px;
+  }
+
+  .player-avatar {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  .player-details h3 {
+    font-size: 10px;
+  }
+
+  .player-score-badge {
+    font-size: 13px;
+  }
+
+  svg#szabolcs-map {
+    max-height: 48vh;
+    min-height: 230px;
+  }
 }
 
 /* ============ SCROLLBAR ============ */
