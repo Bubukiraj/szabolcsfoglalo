@@ -273,6 +273,13 @@ class SzabolcsGame {
     `;
     this.dom.svgMap.appendChild(defs);
 
+    const fullBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    fullBg.setAttribute('width', W);
+    fullBg.setAttribute('height', H);
+    fullBg.setAttribute('fill', '#fbf5e6');
+    fullBg.setAttribute('rx', '8');
+    this.dom.svgMap.appendChild(fullBg);
+
     
     
     
@@ -479,19 +486,21 @@ class SzabolcsGame {
       castleG.setAttribute('class', 'castle-badge');
       castleG.style.display = 'none';
 
+      const labelWidth = Math.max(76, c.name.length * 9.2);
+
       g.innerHTML = `
-        <!-- Város bástya pont: 3 rétegű királyi arany-rubin jelölő -->
         <circle cx="${c.x}" cy="${c.y}" r="6.5" class="city-point-outer" />
         <circle cx="${c.x}" cy="${c.y}" r="3.8" class="city-point-inner" />
         <circle cx="${c.x}" cy="${c.y}" r="1.2" fill="#ffffff" />
 
-        <!-- Város neve: vastag, tiszta fehér körvonallal és árnyékkal a 100%-os láthatóságért -->
-        <text class="city-label" x="${c.x}" y="${c.y + 15}">${c.name}</text>
+        <g class="city-label-wrap" transform="translate(${c.x}, ${c.y + 16})">
+          <rect x="${-labelWidth / 2}" y="-11" width="${labelWidth}" height="17" rx="4" class="city-name-bg" />
+          <text class="city-label" x="0" y="2.5">${c.name}</text>
+        </g>
 
-        <!-- Pontszám jelvény: elegáns arany keretes bőrtáblácska -->
-        <g class="city-badge-wrap" transform="translate(${c.x}, ${c.y + 25})">
-          <rect x="-24" y="-8.5" width="48" height="15" rx="7.5" class="city-points-rect" />
-          <text class="city-points-badge" x="0" y="2.8">${c.points} pt</text>
+        <g class="city-badge-wrap" transform="translate(${c.x}, ${c.y + 30})">
+          <rect x="-24" y="-8" width="48" height="15" rx="4" class="city-points-rect" />
+          <text class="city-points-badge" x="0" y="3.2">${c.points} pt</text>
         </g>
       `;
       g.appendChild(castleG);

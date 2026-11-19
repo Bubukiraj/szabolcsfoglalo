@@ -1,8 +1,3 @@
-
-
-
-
-
 const express = require('express');
 const http = require('http');
 const path = require('path');
@@ -66,7 +61,7 @@ function getSlotColor(slotId) {
 io.on('connection', (socket) => {
   console.log(`[Socket] Új kapcsolat: ${socket.id}`);
 
-  
+
   socket.on('create_room', (data) => {
     const playerName = (data && data.playerName && data.playerName.trim()) || 'Vezér 1';
     let roomCode = generateRoomCode();
@@ -107,7 +102,7 @@ io.on('connection', (socket) => {
     });
   });
 
-  
+
   socket.on('join_room', (data) => {
     const rawCode = (data && data.roomCode) || '';
     const roomCode = rawCode.trim().toUpperCase();
@@ -157,14 +152,14 @@ io.on('connection', (socket) => {
       myPlayerId: slotId
     });
 
-    
+
     io.to(roomCode).emit('room_update', {
       players: room.players,
       hostSocketId: room.hostSocketId
     });
   });
 
-  
+
   socket.on('fill_bot_slot', (data) => {
     const room = rooms.get(socket.roomCode);
     if (!room || room.hostSocketId !== socket.id || room.started) return;
@@ -195,13 +190,13 @@ io.on('connection', (socket) => {
     });
   });
 
-  
+
   socket.on('start_game', () => {
     const room = rooms.get(socket.roomCode);
     if (!room || room.hostSocketId !== socket.id) return;
     if (room.started) return;
 
-    
+
     while (room.players.length < 3) {
       const slotId = getPlayerSlot(room.players);
       const colors = getSlotColor(slotId);
@@ -221,23 +216,23 @@ io.on('connection', (socket) => {
     room.started = true;
     console.log(`[Játék Indul] Szoba: ${room.code}, Játékosok:`, room.players.map(p => `${p.name} (${p.id})`));
 
-    
+
     io.to(room.code).emit('game_started', {
       players: room.players
     });
   });
 
-  
-  
+
+
   socket.on('game_action', (actionData) => {
     const roomCode = socket.roomCode;
     if (!roomCode || !rooms.has(roomCode)) return;
 
-    
+
     socket.to(roomCode).emit('remote_game_action', actionData);
   });
 
-  
+
   socket.on('disconnect', () => {
     console.log(`[Socket] Kapcsolat lezárult: ${socket.id}`);
     const roomCode = socket.roomCode;
@@ -246,14 +241,14 @@ io.on('connection', (socket) => {
     const room = rooms.get(roomCode);
 
     if (!room.started) {
-      
+
       room.players = room.players.filter(p => p.socketId !== socket.id);
 
       if (room.players.length === 0) {
         rooms.delete(roomCode);
         console.log(`[Szoba Törölve] Üres szoba törölve: ${roomCode}`);
       } else {
-        
+
         if (room.hostSocketId === socket.id) {
           const nextHost = room.players.find(p => !p.isBot);
           if (nextHost) {
@@ -267,7 +262,7 @@ io.on('connection', (socket) => {
         });
       }
     } else {
-      
+
       const leftPlayer = room.players.find(p => p.socketId === socket.id);
       if (leftPlayer) {
         leftPlayer.isBot = true;

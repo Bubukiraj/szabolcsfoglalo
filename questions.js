@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 const QUESTIONS_DATABASE = {
   "choice": [
     {
@@ -669,7 +661,7 @@ const QUESTIONS_DATABASE = {
       "topic": "Magyar Irodalom"
     },
     {
-      "q": "Melyik vár ostromát dolgozza fel Gárdonyi Géza klasszikus regénye, az Egri csillagok?",
+      "q": "Melyik magyar végvár hősies védelmét és Dobó István diadalát dolgozza fel Gárdonyi Géza regénye, a Bornemissza Gergely főszereplésével készült mű?",
       "a": [
         "Egri vár",
         "Szigetvár",
@@ -1197,7 +1189,7 @@ const QUESTIONS_DATABASE = {
       "topic": "Magyar Irodalom"
     },
     {
-      "q": "Melyik regényében örökítette meg Jókai Mór a komáromi kőszívű ember fiait?",
+      "q": "Melyik nagysikerű történelmi regényében mutatta be Jókai Mór a Baradlay fivérek (Ödön, Richárd, Jenő) drámai sorsát?",
       "a": [
         "A kőszívű ember fiai",
         "Az arany ember",
@@ -2751,15 +2743,15 @@ const QUESTIONS_DATABASE = {
       "topic": "Irodalom"
     },
     {
-      "q": "Melyik évben adták át Mátészalkán Magyarország első villamosított közvilágítását?",
-      "answer": 1888,
+      "q": "Melyik évben hozta létre Thomas Edison az első működő szénszálas izzólámpát?",
+      "answer": 1879,
       "min": 1850,
-      "max": 1920,
+      "max": 1910,
       "unit": "év",
-      "topic": "Technikatörténet"
+      "topic": "Találmányok"
     },
     {
-      "q": "Melyik évben zajlott a dicsőséges 1848-as forradalom és pesti márciusi megmozdulás?",
+      "q": "Melyik évben zajlott a dicsőséges forradalom és pesti márciusi megmozdulás?",
       "answer": 1848,
       "min": 1800,
       "max": 1900,
@@ -2783,7 +2775,7 @@ const QUESTIONS_DATABASE = {
       "topic": "Sporttörténet"
     },
     {
-      "q": "Melyik évben robbant ki az 1956-os magyar forradalom és szabadságharc?",
+      "q": "Melyik évben robbant ki az magyar forradalom és szabadságharc?",
       "answer": 1956,
       "min": 1940,
       "max": 1970,
@@ -2983,7 +2975,7 @@ const QUESTIONS_DATABASE = {
       "topic": "Fizika"
     },
     {
-      "q": "Körülbelül hány kilométer másodpercenként a hang terjedési sebessége a levegőben (száraz levegőn, méterben 343 m/s)?",
+      "q": "Hány km/h a hang terjedési sebessége normál száraz levegőben kerekítve (343 m/s)?",
       "answer": 1235,
       "min": 600,
       "max": 2000,
@@ -3064,7 +3056,6 @@ const QUESTIONS_DATABASE = {
     }
   ]
 };
-
 
 if (typeof window !== 'undefined') {
   window.QUESTIONS_DATABASE = QUESTIONS_DATABASE;
