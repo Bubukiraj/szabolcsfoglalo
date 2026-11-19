@@ -33,6 +33,7 @@ class SzabolcsGame {
     this.animTimeouts = [];
 
     this.timeLeft = 20;
+    this.briefingTimeLeft = 5;
     this.briefingTimeLeft = 2;
     this.currentQuestion = null;
     this.playerAnswers = {};

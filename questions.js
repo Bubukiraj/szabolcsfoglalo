@@ -1,26 +1,13 @@
 /**
  * =========================================================================
- * 🏰 SZABOLCSFOGLALÓ — NAGY MŰVELTSÉGI KÉRDÉSADATBÁZIS (BŐVÍTETT KIADÁS)
+ * 🏰 SZABOLCSFOGLALÓ — NAGY MŰVELTSÉGI KÉRDÉSADATBÁZIS
  * =========================================================================
- * Klasszikus Honfoglaló stílusú kérdések a legfontosabb műveltségi területekről:
- * Történelem, Szabolcsi helyismeret, Földrajz, Irodalom, Tudomány, Művészet, Sport.
- * 
- * Több mint 250+ gondosan összeállított kérdés, kiegyensúlyozott témákkal.
+ * Általános tudományos, történelmi, földrajzi, természettudományi és klasszikus műveltségi kérdések.
+ * Nincsenek helyi szűk körű kérdések, mindenkinek élvezetes és változatos kvízélmény!
  */
 
 const QUESTIONS_DATABASE = {
   "choice": [
-    {
-      "q": "Melyik vármegye székhelye Nyíregyháza?",
-      "a": [
-        "Szabolcs-Szatmár-Bereg",
-        "Borsod-Abaúj-Zemplén",
-        "Hajdú-Bihar",
-        "Békés"
-      ],
-      "correct": 0,
-      "topic": "Szabolcsi helyismeret"
-    },
     {
       "q": "Melyik híres magyar író és költő született Érmindszenten és tanult Nagykárolyban?",
       "a": [
@@ -671,17 +658,6 @@ const QUESTIONS_DATABASE = {
       "topic": "Magyar Irodalom"
     },
     {
-      "q": "Melyik szabolcsi településen írta Kölcsey Ferenc a Himnusz kéziratát 1823. január 22-én?",
-      "a": [
-        "Szatmárcseke",
-        "Nyíregyháza",
-        "Mátészalka",
-        "Kisvárda"
-      ],
-      "correct": 0,
-      "topic": "Magyar Irodalom"
-    },
-    {
       "q": "Ki a szerzője a híres Toldi-trilógiának?",
       "a": [
         "Arany János",
@@ -1087,17 +1063,6 @@ const QUESTIONS_DATABASE = {
       ],
       "correct": 0,
       "topic": "Animáció"
-    },
-    {
-      "q": "Melyik hungarikumnak számító magyar pálinkafajta készítéséről híres Szabolcs-Szatmár-Bereg vármegye?",
-      "a": [
-        "Szatmári szilvapálinka",
-        "Kecskeméti barackpálinka",
-        "Gönci kajszibarack",
-        "Békési szilva"
-      ],
-      "correct": 0,
-      "topic": "Gasztronómia"
     },
     {
       "q": "Melyik fűszernövény adja a hagyományos magyar gulyás és pörkölt jellegzetes színét és ízét?",
@@ -1507,61 +1472,6 @@ const QUESTIONS_DATABASE = {
       "topic": "Magyar Sport"
     },
     {
-      "q": "Melyik szabolcsi településen található a híres csónakos fejfás református temető?",
-      "a": [
-        "Szatmárcseke",
-        "Tiszadob",
-        "Tarpa",
-        "Nyírbátor"
-      ],
-      "correct": 0,
-      "topic": "Szabolcsi helyismeret"
-    },
-    {
-      "q": "Hol írta Kölcsey Ferenc a magyar Himnusz szövegét 1823. január 22-én?",
-      "a": [
-        "Szatmárcsekén",
-        "Nagykárolyban",
-        "Debrecenben",
-        "Nyíregyházán"
-      ],
-      "correct": 0,
-      "topic": "Irodalom és Helyismeret"
-    },
-    {
-      "q": "Melyik híres szabolcsi kastély kertjében található a híres sövénylabirintus?",
-      "a": [
-        "Tiszadobi Andrássy-kastély",
-        "Tuzséri Lónyay-kastély",
-        "Vajai Vay-kastély",
-        "Mándoki Forgách-kastély"
-      ],
-      "correct": 0,
-      "topic": "Szabolcsi helyismeret"
-    },
-    {
-      "q": "Melyik szabolcsi várost szokás a 'fény városának' is nevezni, mivel itt gyúlt ki Magyarországon először a villanyvilágítás?",
-      "a": [
-        "Mátészalka",
-        "Kisvárda",
-        "Nyíregyháza",
-        "Vásárosnamény"
-      ],
-      "correct": 0,
-      "topic": "Szabolcsi helyismeret"
-    },
-    {
-      "q": "Melyik híres magyar író szülőháza áll a szabolcsi Tiszacsécsén?",
-      "a": [
-        "Móricz Zsigmond",
-        "Krúdy Gyula",
-        "Kölcsey Ferenc",
-        "Mikszáth Kálmán"
-      ],
-      "correct": 0,
-      "topic": "Irodalom"
-    },
-    {
       "q": "Ki volt az a híres kuruc brigadéros, akinek reneszánsz várkastélya ma múzeumként működik Vaján?",
       "a": [
         "Vay Ádám",
@@ -1571,127 +1481,6 @@ const QUESTIONS_DATABASE = {
       ],
       "correct": 0,
       "topic": "Történelem"
-    },
-    {
-      "q": "Melyik településen robbantotta ki Esze Tamás a Rákóczi-szabadságharcot a tiszaháti felkeléssel 1703-ban?",
-      "a": [
-        "Tarpa",
-        "Tiszabecs",
-        "Csenger",
-        "Baktalórántháza"
-      ],
-      "correct": 0,
-      "topic": "Történelem"
-    },
-    {
-      "q": "Melyik növényi különlegességéről és jégkorszaki maradványairól híres a védett Bátorligeti ősláp?",
-      "a": [
-        "Jégkorszaki reliktum fajok",
-        "Trópusi páfrányok",
-        "Sivatagi pozsgások",
-        "Kaktuszfélék"
-      ],
-      "correct": 0,
-      "topic": "Természet"
-    },
-    {
-      "q": "Melyik település református temploma mellett magasodik Magyarország legmagasabb fából épült harangtornya?",
-      "a": [
-        "Nyírbátor",
-        "Csaroda",
-        "Tákos",
-        "Szabolcs"
-      ],
-      "correct": 0,
-      "topic": "Építészet"
-    },
-    {
-      "q": "Hogyan nevezik a népi építészet remekének tartott tákosi református templomot?",
-      "a": [
-        "A mezítlábas Notre-Dame",
-        "A beregi Pantheon",
-        "A szatmári Akropolisz",
-        "A pusztai Katedrális"
-      ],
-      "correct": 0,
-      "topic": "Szabolcsi helyismeret"
-    },
-    {
-      "q": "Melyik folyó torkollik a Tiszába Vásárosnaménynál és Ilknél?",
-      "a": [
-        "Szamos és Kraszna",
-        "Bodrog",
-        "Körös",
-        "Maros"
-      ],
-      "correct": 0,
-      "topic": "Földrajz"
-    },
-    {
-      "q": "Melyik szabolcsi város volt a történelmi Szabolcs vármegye ősi központja Nagykálló előtt?",
-      "a": [
-        "Szabolcs falu (Földvár)",
-        "Nyírbátor",
-        "Kisvárda",
-        "Mátészalka"
-      ],
-      "correct": 0,
-      "topic": "Történelem"
-    },
-    {
-      "q": "Melyik híres magyar író született Nyíregyházán 1878-ban és örökítette meg a szindbádi hangulatot?",
-      "a": [
-        "Krúdy Gyula",
-        "Móricz Zsigmond",
-        "Kosztolányi Dezső",
-        "Karinthy Frigyes"
-      ],
-      "correct": 0,
-      "topic": "Irodalom"
-    },
-    {
-      "q": "Hány hektáros tölgyerdőben fekszik a nemzetközileg is elismert Nyíregyházi Állatpark (Sóstó Zoo)?",
-      "a": [
-        "30 hektáron",
-        "5 hektáron",
-        "100 hektáron",
-        "2 hektáron"
-      ],
-      "correct": 0,
-      "topic": "Szabolcsi helyismeret"
-    },
-    {
-      "q": "Melyik gyümölcsről nevezetes Szabolcs vármegye, amely hungarikumnak számító pálinkát és lekvárt is ad?",
-      "a": [
-        "Szatmári szilva és szabolcsi alma",
-        "Kecskeméti barack",
-        "Gönci kajszi",
-        "Békési szilva"
-      ],
-      "correct": 0,
-      "topic": "Gasztronómia"
-    },
-    {
-      "q": "Milyen hagyományos edényben főzik a tradicionális szatmári szilvalekvárt cukor hozzáadása nélkül?",
-      "a": [
-        "Rézüstben",
-        "Öntöttvas lábasban",
-        "Agyagfazékban",
-        "Alumínium edényben"
-      ],
-      "correct": 0,
-      "topic": "Hagyomány"
-    },
-    {
-      "q": "Melyik néptánc tette országosan ismertté Nagykálló nevét?",
-      "a": [
-        "Kállai kettős",
-        "Csárdás",
-        "Legényes",
-        "Verbunk"
-      ],
-      "correct": 0,
-      "topic": "Kultúra"
     },
     {
       "q": "Melyik évben verte vissza Dobó István és maroknyi serege a török ostromot Eger váránál?",
@@ -1914,17 +1703,6 @@ const QUESTIONS_DATABASE = {
       "topic": "Földrajz"
     },
     {
-      "q": "Melyik Magyarország legmélyebb pontja (75,8 méter a tengerszint felett)?",
-      "a": [
-        "Tiszasziget (Szeged mellett)",
-        "Békéscsaba",
-        "Záhony",
-        "Mohács"
-      ],
-      "correct": 0,
-      "topic": "Földrajz"
-    },
-    {
       "q": "Melyik tó Közép-Európa legnagyobb édesvizű tava?",
       "a": [
         "Balaton",
@@ -2090,17 +1868,6 @@ const QUESTIONS_DATABASE = {
       "topic": "Sport"
     },
     {
-      "q": "Melyik szabolcsi futballcsapat harcolta ki az NB I-es szereplést az elmúlt években és épített modern arénát?",
-      "a": [
-        "Kisvárda Master Good",
-        "Mátészalkai MTK",
-        "Nagyhalász",
-        "Nyírbátori FC"
-      ],
-      "correct": 0,
-      "topic": "Szabolcsi Sport"
-    },
-    {
       "q": "Melyik magyar vívó nyert három egyéni olimpiai aranyérmet kardvívásban (2012, 2016, 2021)?",
       "a": [
         "Szilágyi Áron",
@@ -2110,6 +1877,380 @@ const QUESTIONS_DATABASE = {
       ],
       "correct": 0,
       "topic": "Sport"
+    },
+    {
+      "q": "Hány perc alatt ér el a Nap fénye a Földre a világűrön keresztül?",
+      "a": [
+        "Körülbelül 8 perc",
+        "Azonnal (0 perc)",
+        "Körülbelül 1 óra",
+        "Körülbelül 24 perc"
+      ],
+      "correct": 0,
+      "topic": "Csillagászat"
+    },
+    {
+      "q": "Melyik bolygót nevezik a Naprendszerben 'Vörös Bolygónak' a felszínén lévő vas-oxid miatt?",
+      "a": [
+        "Mars",
+        "Vénusz",
+        "Merkúr",
+        "Jupiter"
+      ],
+      "correct": 0,
+      "topic": "Csillagászat"
+    },
+    {
+      "q": "Melyik égitest a Föld egyetlen természetes kísérője?",
+      "a": [
+        "A Hold",
+        "A Phobosz",
+        "A Titan",
+        "A Ganümédész"
+      ],
+      "correct": 0,
+      "topic": "Csillagászat"
+    },
+    {
+      "q": "Milyen típusú csillag a mi Napunk a csillagászati osztályozás szerint?",
+      "a": [
+        "Sárga törpe (G-típusú)",
+        "Vörös óriás",
+        "Fehér törpe",
+        "Kék szuperóriás"
+      ],
+      "correct": 0,
+      "topic": "Csillagászat"
+    },
+    {
+      "q": "Hogy nevezik a csillagászatban azt a határt egy fekete lyuk körül, ahonnan még a fény sem tud kiszabadulni?",
+      "a": [
+        "Eseményhorizont",
+        "Fényfal",
+        "Gravitációs töréspont",
+        "Szingularitási gömb"
+      ],
+      "correct": 0,
+      "topic": "Fizika & Űrkutatás"
+    },
+    {
+      "q": "Mekkora a fény terjedési sebessége vákuumban kerekítve?",
+      "a": [
+        "300 000 km/másodperc",
+        "150 000 km/másodperc",
+        "1 000 000 km/másodperc",
+        "30 000 km/másodperc"
+      ],
+      "correct": 0,
+      "topic": "Fizika"
+    },
+    {
+      "q": "Melyik gáz alkotja a Föld légkörének legnagyobb részét (kb. 78%-át)?",
+      "a": [
+        "Nitrogén",
+        "Oxigén",
+        "Szén-dioxid",
+        "Argon"
+      ],
+      "correct": 0,
+      "topic": "Kémia"
+    },
+    {
+      "q": "Melyik az egyetlen fém, amely szobahőmérsékleten folyékony halmazállapotú?",
+      "a": [
+        "Higany",
+        "Ólom",
+        "Bróm",
+        "Gallium"
+      ],
+      "correct": 0,
+      "topic": "Kémia"
+    },
+    {
+      "q": "Melyik mértékegység jelöli az elektromos feszültséget a fizikában?",
+      "a": [
+        "Volt (V)",
+        "Amper (A)",
+        "Watt (W)",
+        "Ohm (Ω)"
+      ],
+      "correct": 0,
+      "topic": "Fizika"
+    },
+    {
+      "q": "Ki fogalmazta meg az egyetemes tömegvonzás (gravitáció) törvényét és a klasszikus mechanika alaptörvényeit?",
+      "a": [
+        "Isaac Newton",
+        "Galileo Galilei",
+        "Nikola Tesla",
+        "Johannes Kepler"
+      ],
+      "correct": 0,
+      "topic": "Fizika"
+    },
+    {
+      "q": "Milyen részecskék keringenek az atommag körül a Bohr-féle atommodell szerint?",
+      "a": [
+        "Elektronok",
+        "Protonok",
+        "Neutronok",
+        "Fotonok"
+      ],
+      "correct": 0,
+      "topic": "Atomfizika"
+    },
+    {
+      "q": "Mi a konyhasó hivatalos kémiai megnevezése és képlete?",
+      "a": [
+        "Nátrium-klorid (NaCl)",
+        "Kálium-jodid (KI)",
+        "Kalcium-karbonát (CaCO3)",
+        "Nátrium-hidrogénkarbonát"
+      ],
+      "correct": 0,
+      "topic": "Kémia"
+    },
+    {
+      "q": "Melyik szerv az emberi szervezet legnagyobb tömegű és kiterjedésű szerve?",
+      "a": [
+        "A bőr",
+        "A máj",
+        "A tüdő",
+        "A vékonybél"
+      ],
+      "correct": 0,
+      "topic": "Biológia"
+    },
+    {
+      "q": "Melyik zöld pigment felelős a növények fotoszintéziséért és zöld színéért?",
+      "a": [
+        "Klorofill",
+        "Karotin",
+        "Melanin",
+        "Hemoglobin"
+      ],
+      "correct": 0,
+      "topic": "Növénytan"
+    },
+    {
+      "q": "Melyik állatcsoportba tartoznak a bálnák és a delfinek?",
+      "a": [
+        "Emlősök",
+        "Halak",
+        "Hüllők",
+        "Kétéltűek"
+      ],
+      "correct": 0,
+      "topic": "Állattan"
+    },
+    {
+      "q": "Melyik szerv felelős az emberi szervezetben az inzulin nevű hormon termeléséért?",
+      "a": [
+        "Hasnyálmirigy",
+        "Máj",
+        "Pajzsmirigy",
+        "Mellékvese"
+      ],
+      "correct": 0,
+      "topic": "Anatómia"
+    },
+    {
+      "q": "Ki fedezte fel az első hatékony antibiotikumot, a penicillint 1928-ban?",
+      "a": [
+        "Alexander Fleming",
+        "Louis Pasteur",
+        "Robert Koch",
+        "Edward Jenner"
+      ],
+      "correct": 0,
+      "topic": "Orvostudomány"
+    },
+    {
+      "q": "Melyik a világ jelenleg élő legnagyobb testű állatfaja?",
+      "a": [
+        "Kék bálna",
+        "Afrikai elefánt",
+        "Óriáskalmár",
+        "Bálnacápa"
+      ],
+      "correct": 0,
+      "topic": "Biológia"
+    },
+    {
+      "q": "Melyik a Föld legnagyobb területű óceánja, amely a bolygó felületének több mint egyharmadát borítja?",
+      "a": [
+        "Csendes-óceán",
+        "Atlanti-óceán",
+        "Indiai-óceán",
+        "Jeges-tenger"
+      ],
+      "correct": 0,
+      "topic": "Földrajz"
+    },
+    {
+      "q": "Melyik a világ legnagyobb kiterjedésű forró sivataga Afrikában?",
+      "a": [
+        "Szahara",
+        "Góbi",
+        "Kalahári",
+        "Atacama"
+      ],
+      "correct": 0,
+      "topic": "Földrajz"
+    },
+    {
+      "q": "Melyik ország rendelkezik a világon a legnagyobb szárazföldi területtel?",
+      "a": [
+        "Oroszország",
+        "Kanada",
+        "Kína",
+        "Amerikai Egyesült Államok"
+      ],
+      "correct": 0,
+      "topic": "Földrajz"
+    },
+    {
+      "q": "Melyik a világ legmélyebb édesvizű tava Szibériában?",
+      "a": [
+        "Bajkál-tó",
+        "Viktória-tó",
+        "Felső-tó",
+        "Kaszpi-tenger"
+      ],
+      "correct": 0,
+      "topic": "Földrajz"
+    },
+    {
+      "q": "Melyik európai vulkán kitörése pusztította el Pompeji ókori városát Kr. u. 79-ben?",
+      "a": [
+        "Vezúv",
+        "Etna",
+        "Stromboli",
+        "Szantorini"
+      ],
+      "correct": 0,
+      "topic": "Földrajz & Történelem"
+    },
+    {
+      "q": "Mi Izland szigetének fővárosa?",
+      "a": [
+        "Reykjavík",
+        "Oslo",
+        "Helsinki",
+        "Koppenhága"
+      ],
+      "correct": 0,
+      "topic": "Földrajz"
+    },
+    {
+      "q": "Ki készítette el a modern számítógépek elvi alapjait jelentő tárolt programú modellt (architektúrát)?",
+      "a": [
+        "Neumann János",
+        "Alan Turing",
+        "Charles Babbage",
+        "Bill Gates"
+      ],
+      "correct": 0,
+      "topic": "Informatika"
+    },
+    {
+      "q": "Melyik cég dobta piacra a világ első iPhone okostelefonját 2007-ben?",
+      "a": [
+        "Apple",
+        "Samsung",
+        "Nokia",
+        "Motorola"
+      ],
+      "correct": 0,
+      "topic": "Technológia"
+    },
+    {
+      "q": "Mit jelent a népszerű 'Wi-Fi' vezeték nélküli adatátviteli rövidítés?",
+      "a": [
+        "Wireless Fidelity",
+        "Wide Frequency",
+        "Wireless Fiber",
+        "Web Information"
+      ],
+      "correct": 0,
+      "topic": "Technológia"
+    },
+    {
+      "q": "Ki találta fel a dinamitot, és alapította meg a nevét viselő legrangosabb tudományos díjat?",
+      "a": [
+        "Alfred Nobel",
+        "Thomas Edison",
+        "Nikola Tesla",
+        "Ernest Rutherford"
+      ],
+      "correct": 0,
+      "topic": "Találmányok"
+    },
+    {
+      "q": "Melyik híres magyar fizikus és villamosmérnök fejlesztette ki a hologram elvét, amiért Nobel-díjat kapott?",
+      "a": [
+        "Gábor Dénes",
+        "Wigner Jenő",
+        "Szilárd Leó",
+        "Telkes Mária"
+      ],
+      "correct": 0,
+      "topic": "Tudomány"
+    },
+    {
+      "q": "Melyik ókori világcsoda maradt fenn egyetlenként a mai napig?",
+      "a": [
+        "A gízai nagy piramis",
+        "A rodoszi kolosszus",
+        "Az alexandriai világítótorony",
+        "Szemiramisz függőkertje"
+      ],
+      "correct": 0,
+      "topic": "Történelem"
+    },
+    {
+      "q": "Melyik folyó partján fejlődött ki az ókori egyiptomi birodalom?",
+      "a": [
+        "Nílus",
+        "Tigris",
+        "Eufrátesz",
+        "Jangce"
+      ],
+      "correct": 0,
+      "topic": "Történelem"
+    },
+    {
+      "q": "Melyik évben fedezte fel Kolumbusz Kristóf az amerikai kontinenst?",
+      "a": [
+        "1492-ben",
+        "1453-ban",
+        "1514-ben",
+        "1488-ban"
+      ],
+      "correct": 0,
+      "topic": "Történelem"
+    },
+    {
+      "q": "Ki volt az a híres római államférfi és hadvezér, akit a márciusi idusán gyilkoltak meg Kr. e. 44-ben?",
+      "a": [
+        "Julius Caesar",
+        "Nero",
+        "Marcus Aurelius",
+        "Cicero"
+      ],
+      "correct": 0,
+      "topic": "Történelem"
+    },
+    {
+      "q": "Melyik évben döntötték le a hidegháborút szimbolizáló Berlini falat?",
+      "a": [
+        "1989-ben",
+        "1991-ben",
+        "1985-ben",
+        "1979-ben"
+      ],
+      "correct": 0,
+      "topic": "Történelem"
     }
   ],
   "guess": [
@@ -2192,14 +2333,6 @@ const QUESTIONS_DATABASE = {
       "max": 2020,
       "unit": "év",
       "topic": "Történelem"
-    },
-    {
-      "q": "Melyik évben írta Kölcsey Ferenc a magyar Himnusz költeményét Szatmárcsekén?",
-      "answer": 1823,
-      "min": 1800,
-      "max": 1860,
-      "unit": "év",
-      "topic": "Irodalomtörténet"
     },
     {
       "q": "Melyik évben lépett Neil Armstrong az Apollo–11 küldetéssel először a Holdra?",
@@ -2610,36 +2743,12 @@ const QUESTIONS_DATABASE = {
       "topic": "Játék"
     },
     {
-      "q": "Melyik évben tartották a híres Szabolcsi Zsinatot Szent László király elnökletével?",
-      "answer": 1092,
-      "min": 1000,
-      "max": 1200,
-      "unit": "év",
-      "topic": "Szabolcsi történelem"
-    },
-    {
-      "q": "Melyik évben bontott zászlót II. Rákóczi Ferenc Tarpán és Tiszabecsnél?",
-      "answer": 1703,
-      "min": 1680,
-      "max": 1750,
-      "unit": "év",
-      "topic": "Történelem"
-    },
-    {
       "q": "Melyik évben született a magyar Himnusz költője, Kölcsey Ferenc?",
       "answer": 1790,
       "min": 1750,
       "max": 1830,
       "unit": "év",
       "topic": "Irodalom"
-    },
-    {
-      "q": "Melyik évben épült fel a híres tiszadobi Andrássy-kastély?",
-      "answer": 1885,
-      "min": 1840,
-      "max": 1920,
-      "unit": "év",
-      "topic": "Építészet"
     },
     {
       "q": "Melyik évben adták át Mátészalkán Magyarország első villamosított közvilágítását?",
@@ -2706,36 +2815,12 @@ const QUESTIONS_DATABASE = {
       "topic": "Földrajz"
     },
     {
-      "q": "Hány négyzetkilométer Szabolcs-Szatmár-Bereg vármegye teljes területe kerekítve?",
-      "answer": 5936,
-      "min": 3000,
-      "max": 9000,
-      "unit": "km²",
-      "topic": "Szabolcsi földrajz"
-    },
-    {
-      "q": "Körülbelül hány ezer lakosa van Nyíregyháza megyeszékhelynek?",
-      "answer": 116,
-      "min": 50,
-      "max": 200,
-      "unit": "ezer fő",
-      "topic": "Demográfia"
-    },
-    {
       "q": "Hány méter magas a világ legmagasabb épülete, a dubaji Burdzs Kalifa?",
       "answer": 828,
       "min": 400,
       "max": 1300,
       "unit": "méter",
       "topic": "Építészet"
-    },
-    {
-      "q": "Hány kilométer a Budapest és Nyíregyháza közötti távolság közúton (M3-as autópályán)?",
-      "answer": 228,
-      "min": 120,
-      "max": 350,
-      "unit": "km",
-      "topic": "Közlekedés"
     },
     {
       "q": "Hány billentyű található egy hagyományos, szabványos zongorán?",
@@ -2818,14 +2903,6 @@ const QUESTIONS_DATABASE = {
       "topic": "Földrajz"
     },
     {
-      "q": "Hány állatfaj él körülbelül a Nyíregyházi Állatparkban?",
-      "answer": 500,
-      "min": 200,
-      "max": 900,
-      "unit": "faj",
-      "topic": "Szabolcsi természet"
-    },
-    {
       "q": "Hány méter a szabványos olimpiai úszómedence hossza?",
       "answer": 50,
       "min": 25,
@@ -2839,6 +2916,150 @@ const QUESTIONS_DATABASE = {
       "min": 15,
       "max": 40,
       "unit": "másodperc",
+      "topic": "Sport"
+    },
+    {
+      "q": "Melyik évben fedezte fel Kolumbusz Kristóf az amerikai kontinenst?",
+      "answer": 1492,
+      "min": 1400,
+      "max": 1600,
+      "unit": "év",
+      "topic": "Történelem"
+    },
+    {
+      "q": "Melyik évben süllyedt el a Titanic luxusgőzös a jégheggyel való ütközést követően?",
+      "answer": 1912,
+      "min": 1880,
+      "max": 1940,
+      "unit": "év",
+      "topic": "Történelem"
+    },
+    {
+      "q": "Melyik évben lépett fel először ember a Hold felszínére az Apollo-11 küldetés során?",
+      "answer": 1969,
+      "min": 1950,
+      "max": 1990,
+      "unit": "év",
+      "topic": "Űrkutatás"
+    },
+    {
+      "q": "Melyik évben robbant ki a francia forradalom a Bastille ostromával?",
+      "answer": 1789,
+      "min": 1750,
+      "max": 1830,
+      "unit": "év",
+      "topic": "Történelem"
+    },
+    {
+      "q": "Melyik évben robbantották fel az első atombombát kísérleti jelleggel Új-Mexikóban?",
+      "answer": 1945,
+      "min": 1930,
+      "max": 1960,
+      "unit": "év",
+      "topic": "Technikatörténet"
+    },
+    {
+      "q": "Melyik évben indították útjára az internet ősét jelentő ARPANET hálózatot az USA-ban?",
+      "answer": 1969,
+      "min": 1955,
+      "max": 1985,
+      "unit": "év",
+      "topic": "Informatika"
+    },
+    {
+      "q": "Hány méter magas a Föld legmagasabb hegycsúcsa, a Mount Everest (Csomolungma)?",
+      "answer": 8848,
+      "min": 6000,
+      "max": 12000,
+      "unit": "méter",
+      "topic": "Földrajz"
+    },
+    {
+      "q": "Hány Celsius-fok a fizika szerinti abszolút nulla fok a Kelvin-skálán (kerekítve)?",
+      "answer": -273,
+      "min": -400,
+      "max": 0,
+      "unit": "°C",
+      "topic": "Fizika"
+    },
+    {
+      "q": "Körülbelül hány kilométer másodpercenként a hang terjedési sebessége a levegőben (száraz levegőn, méterben 343 m/s)?",
+      "answer": 1235,
+      "min": 600,
+      "max": 2000,
+      "unit": "km/h",
+      "topic": "Fizika"
+    },
+    {
+      "q": "Hány csont található átlagosan egy felnőtt emberi csontvázban?",
+      "answer": 206,
+      "min": 150,
+      "max": 300,
+      "unit": "csont",
+      "topic": "Anatómia"
+    },
+    {
+      "q": "Hány kilométer a Föld egyenlítői kerülete kerekítve?",
+      "answer": 40075,
+      "min": 20000,
+      "max": 60000,
+      "unit": "km",
+      "topic": "Földrajz"
+    },
+    {
+      "q": "Körülbelül hány millió kilométer a Föld és a Nap átlagos távolsága (1 Csillagászati Egység)?",
+      "answer": 150,
+      "min": 80,
+      "max": 250,
+      "unit": "millió km",
+      "topic": "Csillagászat"
+    },
+    {
+      "q": "Hány kémiai elem található a periódusos rendszerben a mai hivatalos állás szerint?",
+      "answer": 118,
+      "min": 80,
+      "max": 150,
+      "unit": "elem",
+      "topic": "Kémia"
+    },
+    {
+      "q": "Hány méter mélyre merülhet a legmélyebb pontján a világóceán (Mariana-árok)?",
+      "answer": 11034,
+      "min": 7000,
+      "max": 15000,
+      "unit": "méter",
+      "topic": "Földrajz"
+    },
+    {
+      "q": "Hány napig tart a Földnek egyszer megkerülnie a Napot (egy csillagászati év)?",
+      "answer": 365,
+      "min": 300,
+      "max": 400,
+      "unit": "nap",
+      "topic": "Csillagászat"
+    },
+    {
+      "q": "Hány százalék a Föld felszínének óceánok és tengerek által borított vízfelülete kerekítve?",
+      "answer": 71,
+      "min": 40,
+      "max": 95,
+      "unit": "%",
+      "topic": "Földrajz"
+    },
+    {
+      "q": "Hány méter magas a párizsi Eiffel-torony az antennával együtt kerekítve?",
+      "answer": 330,
+      "min": 180,
+      "max": 500,
+      "unit": "méter",
+      "topic": "Építészet"
+    },
+    {
+      "q": "Hány percig tart egy hivatalos Forma-1-es futam maximális időtartama piros zászló nélkül?",
+      "answer": 120,
+      "min": 60,
+      "max": 180,
+      "unit": "perc",
       "topic": "Sport"
     }
   ]
