@@ -32,9 +32,8 @@ app.get('/health', (req, res) => {
 const rooms = new Map();
 
 const HISTORICAL_BOTS = [
-  { name: 'Báthori Erzsébet', color: 'p2', colorHex: '#2ecc71' },
-  { name: 'Kállai Botond', color: 'p3', colorHex: '#3498db' },
-  { name: 'Jósa András', color: 'p2', colorHex: '#2ecc71' }
+  { name: 'Mc Isti', color: 'p2', colorHex: '#2ecc71' },
+  { name: 'Subi Roli', color: 'p3', colorHex: '#3498db' }
 ];
 
 function generateRoomCode() {

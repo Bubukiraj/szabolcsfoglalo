@@ -11,7 +11,7 @@ class SzabolcsGame {
     // Játékosok inicializálása
     this.players = [
       { id: 'p1', name: 'Játékos 1', color: 'p1', colorHex: '#e74c3c', score: 0, isBot: false, castleCity: null, towers: 3, alive: true, lifelines: { choice: 1, guess: 1 } },
-      { id: 'p2', name: 'Mc isti', color: 'p2', colorHex: '#2ecc71', score: 0, isBot: true, castleCity: null, towers: 3, alive: true, lifelines: { choice: 1, guess: 1 } },
+      { id: 'p2', name: 'Mc Isti', color: 'p2', colorHex: '#2ecc71', score: 0, isBot: true, castleCity: null, towers: 3, alive: true, lifelines: { choice: 1, guess: 1 } },
       { id: 'p3', name: 'Subi Roli', color: 'p3', colorHex: '#3498db', score: 0, isBot: true, castleCity: null, towers: 3, alive: true, lifelines: { choice: 1, guess: 1 } }
     ];
 
@@ -280,7 +280,7 @@ class SzabolcsGame {
       const x2 = 105 + Math.cos(rad) * 900;
       const y2 = 115 + Math.sin(rad) * 900;
       rhumbLinesHtml += `<line x1="105" y1="115" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#b89358" stroke-width="0.7" opacity="0.22" stroke-dasharray="8,6" />`;
-      
+
       const x3 = 830 + Math.cos(rad) * 700;
       const y3 = 580 + Math.sin(rad) * 700;
       rhumbLinesHtml += `<line x1="830" y1="580" x2="${x3.toFixed(1)}" y2="${y3.toFixed(1)}" stroke="#b89358" stroke-width="0.6" opacity="0.18" stroke-dasharray="6,8" />`;
@@ -704,7 +704,7 @@ class SzabolcsGame {
     this.players[0].alive = true;
     this.players[0].lifelines = { choice: 1, guess: 1 };
 
-    this.players[1].name = 'Báthori Erzsébet';
+    this.players[1].name = 'Mc Isti';
     this.players[1].isBot = true;
     this.players[1].score = 0;
     this.players[1].towers = 3;
@@ -712,7 +712,7 @@ class SzabolcsGame {
     this.players[1].alive = true;
     this.players[1].lifelines = { choice: 1, guess: 1 };
 
-    this.players[2].name = 'Kállai Botond';
+    this.players[2].name = 'Subi Roli';
     this.players[2].isBot = true;
     this.players[2].score = 0;
     this.players[2].towers = 3;
