@@ -1711,7 +1711,12 @@ class SzabolcsGame {
         }
       }
 
-      const crown = rankIdx === 0 ? '👑 ' : '';
+      let crown = '';
+      if (this.currentQuestion.type === 'choice') {
+        crown = (rankIdx === 0 && item.isCorrect) ? '👑 ' : '';
+      } else {
+        crown = (rankIdx === 0 && item.diff < 999999) ? '👑 ' : '';
+      }
       row.innerHTML = `
         <span><strong>${crown}${item.player.name}</strong> <span class="player-guess-tag">${guessInfo}</span></span>
         <span>⏱️ ${item.time.toFixed(1)} mp</span>
@@ -1759,11 +1764,19 @@ class SzabolcsGame {
       list.sort((a, b) => {
         if (a.isCorrect && !b.isCorrect) return -1;
         if (!a.isCorrect && b.isCorrect) return 1;
+        if (this.currentQuestion.context === 'BATTLE' && !a.isCorrect && !b.isCorrect) {
+          if (a.player.id === this.battleDefender.id) return -1;
+          if (b.player.id === this.battleDefender.id) return 1;
+        }
         return a.time - b.time;
       });
     } else {
       list.sort((a, b) => {
         if (a.diff !== b.diff) return a.diff - b.diff;
+        if (this.currentQuestion.context === 'BATTLE' && a.diff === b.diff && a.diff > 0) {
+          if (a.player.id === this.battleDefender.id) return -1;
+          if (b.player.id === this.battleDefender.id) return 1;
+        }
         return a.time - b.time;
       });
     }
@@ -1983,9 +1996,36 @@ class SzabolcsGame {
     const targetCity = this.battleTargetCity;
     const isBaseAttack = (defender.castleCity === targetCity.id);
 
-    const winner = ranked[0].player;
+    const attRes = ranked.find(r => r.player.id === attacker.id);
+    const defRes = ranked.find(r => r.player.id === defender.id);
 
-    if (winner.id === attacker.id) {
+    let attackerWon = false;
+
+    if (this.currentQuestion.type === 'choice') {
+      if (attRes && attRes.isCorrect) {
+        if (!defRes || !defRes.isCorrect) {
+          attackerWon = true;
+        } else {
+          attackerWon = (attRes.time < defRes.time);
+        }
+      } else {
+        attackerWon = false;
+      }
+    } else {
+      if (attRes.diff < defRes.diff) {
+        attackerWon = true;
+      } else if (attRes.diff === defRes.diff) {
+        if (attRes.diff === 0 && defRes.diff === 0) {
+          attackerWon = (attRes.time < defRes.time);
+        } else {
+          attackerWon = false;
+        }
+      } else {
+        attackerWon = false;
+      }
+    }
+
+    if (attackerWon) {
       if (isBaseAttack) {
         defender.towers--;
         sounds.playCastleHit();
