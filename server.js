@@ -17,10 +17,17 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname)));
 
-
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', uptime: process.uptime(), rooms: rooms.size });
 });
+
+app.get('/ping', (req, res) => {
+  res.status(200).send('pong');
+});
+
+app.head('/health', (req, res) => res.status(200).end());
+app.head('/ping', (req, res) => res.status(200).end());
+app.head('/', (req, res) => res.status(200).end());
 
 
 
