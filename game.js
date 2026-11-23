@@ -885,6 +885,11 @@ class SzabolcsGame {
 
     const city = this.mapData.cities.find(c => c.id === chosenId);
     this.assignBaseCity(bot, city);
+
+    if (this.isOnlineGame && this.isHost && this.multiplayer) {
+      this.multiplayer.sendAction('PICK_BASE', { cityId: city.id, playerId: bot.id });
+    }
+
     this.activePlayerIdx++;
     this.promptNextBaseSelection();
   }
@@ -1579,6 +1584,9 @@ class SzabolcsGame {
         if (!this.playerAnswers[p.id] && this.timeLeft > 0) {
           const answerVal = this.generateBotAnswer(p);
           this.handlePlayerAnswer(p.id, answerVal);
+          if (this.isOnlineGame && this.isHost && this.multiplayer) {
+            this.multiplayer.sendAction('SUBMIT_ANSWER', { playerId: p.id, answer: answerVal, timeSpent: (20 - this.timeLeft) });
+          }
         }
       }, quickDelay);
       this.botTimeouts.push(t);
@@ -2309,6 +2317,8 @@ class SzabolcsGame {
       const card = this.dom.pCards[idx];
       const isMe = (p.id === this.myPlayerId);
       card.querySelector('.player-name').innerText = isMe ? `${p.name} (Te)` : p.name;
+      const avatar = card.querySelector('.player-avatar');
+      if (avatar) avatar.innerText = p.isBot ? '🤖' : (p.name ? p.name.charAt(0).toUpperCase() : 'V');
       const botTag = card.querySelector('.bot-tag');
       if (botTag) botTag.style.display = p.isBot ? 'inline-block' : 'none';
       card.querySelector('.castle-towers').innerText = '🏰 🏰 🏰';
