@@ -24,6 +24,7 @@ class SzabolcsMultiplayer {
     this.cacheDom();
     this.bindEvents();
     this.checkUrlForRoomCode();
+    this.prewarmServer();
   }
 
   cacheDom() {
@@ -93,25 +94,31 @@ class SzabolcsMultiplayer {
     if (this.dom.btnCreateRoom) {
       this.dom.btnCreateRoom.addEventListener('click', () => {
         const originalText = this.dom.btnCreateRoom.innerText;
-        this.dom.btnCreateRoom.innerText = '⌛ Szoba létrehozása...';
+        this.dom.btnCreateRoom.innerText = '⌛ Kapcsolódás a szerverhez...';
         this.dom.btnCreateRoom.disabled = true;
+
+        const slowNotice = setTimeout(() => {
+          if (this.dom.btnCreateRoom && this.dom.btnCreateRoom.disabled) {
+            this.dom.btnCreateRoom.innerText = '⌛ Szerver ébresztése... (~25 mp)';
+          }
+        }, 3000);
 
         this.ensureSocketConnected(
           () => {
+            clearTimeout(slowNotice);
             const pName = this.getPlayerName();
-            console.log('[Multiplayer] Szoba létrehozás kérése:', pName);
             this.socket.emit('create_room', { playerName: pName });
           },
           (err) => {
+            clearTimeout(slowNotice);
             this.dom.btnCreateRoom.innerText = originalText;
             this.dom.btnCreateRoom.disabled = false;
-            alert('⚠️ Nem sikerült kapcsolódni a szerverhez!\nHa a Render.com-ot használod, ellenőrizd, hogy a Start Command "node server.js"-re van-e állítva, és a szerver zöld "Live" állapotban van-e.');
+            alert('⚠️ Nem sikerült kapcsolódni a szerverhez! Kérlek várj pár másodpercet és próbáld újra.');
           }
         );
       });
     }
 
-    
     if (this.dom.btnJoinRoom) {
       this.dom.btnJoinRoom.addEventListener('click', () => {
         const code = this.dom.inputRoomCode.value.trim().toUpperCase();
@@ -124,16 +131,23 @@ class SzabolcsMultiplayer {
         this.dom.btnJoinRoom.innerText = '⌛ Csatlakozás...';
         this.dom.btnJoinRoom.disabled = true;
 
+        const slowNotice = setTimeout(() => {
+          if (this.dom.btnJoinRoom && this.dom.btnJoinRoom.disabled) {
+            this.dom.btnJoinRoom.innerText = '⌛ Szerver ébresztése... (~25 mp)';
+          }
+        }, 3000);
+
         this.ensureSocketConnected(
           () => {
+            clearTimeout(slowNotice);
             const pName = this.getPlayerName();
-            console.log('[Multiplayer] Csatlakozás kérése:', code, pName);
             this.socket.emit('join_room', { roomCode: code, playerName: pName });
           },
           (err) => {
+            clearTimeout(slowNotice);
             this.dom.btnJoinRoom.innerText = originalText;
             this.dom.btnJoinRoom.disabled = false;
-            alert('⚠️ Nem sikerült kapcsolódni a szerverhez!\nEllenőrizd a szervert és próbáld újra.');
+            alert('⚠️ Nem sikerült kapcsolódni a szerverhez! Kérlek ellenőrizd a szobakódot és próbáld újra.');
           }
         );
       });
@@ -162,7 +176,10 @@ class SzabolcsMultiplayer {
     if (this.dom.btnCopyLink) {
       this.dom.btnCopyLink.addEventListener('click', () => {
         if (!this.roomCode) return;
-        const url = `${window.location.origin}${window.location.pathname}?szoba=${this.roomCode}`;
+        const base = (window.location.protocol.startsWith('http'))
+          ? `${window.location.origin}${window.location.pathname}`
+          : 'https://szabolcsfoglalo.onrender.com/';
+        const url = `${base}?szoba=${this.roomCode}`;
         navigator.clipboard.writeText(url).then(() => {
           this.showNotification('🔗 Meghívó link kimásolva!');
         });
@@ -222,6 +239,29 @@ class SzabolcsMultiplayer {
   }
 
   
+  getServerUrl() {
+    if (window.location.protocol === 'file:' || !window.location.protocol.startsWith('http')) {
+      return 'https://szabolcsfoglalo.onrender.com';
+    }
+    if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port === '3000') {
+      return window.location.origin;
+    }
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'https://szabolcsfoglalo.onrender.com';
+    }
+    if (window.location.hostname.includes('onrender.com')) {
+      return window.location.origin;
+    }
+    return 'https://szabolcsfoglalo.onrender.com';
+  }
+
+  prewarmServer() {
+    try {
+      const url = this.getServerUrl() + '/ping';
+      fetch(url, { method: 'GET', mode: 'cors', cache: 'no-store' }).catch(() => {});
+    } catch (e) {}
+  }
+
   ensureSocketConnected(callback, errorCallback) {
     if (this.socket && this.socket.connected) {
       if (callback) callback();
@@ -235,11 +275,13 @@ class SzabolcsMultiplayer {
     }
 
     if (!this.socket) {
-      this.socket = io({
-        transports: ['websocket', 'polling'],
+      const serverUrl = this.getServerUrl();
+      this.socket = io(serverUrl, {
+        transports: ['polling', 'websocket'],
         reconnection: true,
-        reconnectionAttempts: 5,
-        timeout: 10000
+        reconnectionAttempts: 25,
+        reconnectionDelay: 1000,
+        timeout: 45000
       });
 
       this.setupSocketListeners();
@@ -254,29 +296,18 @@ class SzabolcsMultiplayer {
         if (isHandled) return;
         isHandled = true;
         this.connected = true;
-        this.socket.off('connect_error', onError);
         if (callback) callback();
       };
 
-      const onError = (err) => {
-        if (isHandled) return;
-        isHandled = true;
-        this.socket.off('connect', onConnect);
-        console.error('[Multiplayer] Socket kapcsolódási hiba:', err);
-        if (errorCallback) errorCallback(err);
-      };
-
       this.socket.once('connect', onConnect);
-      this.socket.once('connect_error', onError);
 
       setTimeout(() => {
-        if (!isHandled && !this.socket.connected) {
+        if (!isHandled && (!this.socket || !this.socket.connected)) {
           isHandled = true;
           this.socket.off('connect', onConnect);
-          this.socket.off('connect_error', onError);
           if (errorCallback) errorCallback('Connection timed out');
         }
-      }, 9000);
+      }, 40000);
     }
   }
 
