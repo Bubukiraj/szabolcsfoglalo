@@ -244,21 +244,21 @@ class SzabolcsMultiplayer {
       return 'https://szabolcsfoglalo.onrender.com';
     }
     if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port === '3000') {
-      return window.location.origin;
+      return undefined;
     }
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       return 'https://szabolcsfoglalo.onrender.com';
     }
     if (window.location.hostname.includes('onrender.com')) {
-      return window.location.origin;
+      return undefined;
     }
     return 'https://szabolcsfoglalo.onrender.com';
   }
 
   prewarmServer() {
     try {
-      const url = this.getServerUrl() + '/ping';
-      fetch(url, { method: 'GET', mode: 'cors', cache: 'no-store' }).catch(() => {});
+      const base = this.getServerUrl() || window.location.origin;
+      fetch(base + '/ping', { method: 'GET', mode: 'cors', cache: 'no-store' }).catch(() => {});
     } catch (e) {}
   }
 
@@ -277,7 +277,7 @@ class SzabolcsMultiplayer {
     if (!this.socket) {
       const serverUrl = this.getServerUrl();
       this.socket = io(serverUrl, {
-        transports: ['polling', 'websocket'],
+        transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionAttempts: 25,
         reconnectionDelay: 1000,
